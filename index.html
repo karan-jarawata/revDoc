@@ -3,59 +3,226 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Karan's Engineering Roadmap</title>
+    <title>revDoc</title>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800;900&display=swap" rel="stylesheet">
     <style>
+        * { box-sizing: border-box; margin: 0; padding: 0; }
+
         body {
-            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
-            background-color: #0d1117; /* GitHub Dark Dim */
-            color: #c9d1d9;
+            font-family: 'Inter', sans-serif;
+            background: #09090b;
+            color: #fafafa;
+            min-height: 100vh;
             display: flex;
             flex-direction: column;
             align-items: center;
             justify-content: center;
-            height: 100vh;
-            margin: 0;
+            padding: 3rem 1.5rem;
         }
-        h1 { margin-bottom: 40px; font-size: 2.5rem; color: #58a6ff; }
-        .container { display: flex; gap: 30px; flex-wrap: wrap; justify-content: center; }
+
+        body::before {
+            content: '';
+            position: fixed;
+            inset: 0;
+            background-image:
+                linear-gradient(rgba(255,255,255,0.018) 1px, transparent 1px),
+                linear-gradient(90deg, rgba(255,255,255,0.018) 1px, transparent 1px);
+            background-size: 40px 40px;
+            pointer-events: none;
+        }
+
+        .wrapper {
+            position: relative;
+            width: 100%;
+            max-width: 560px;
+            display: flex;
+            flex-direction: column;
+            gap: 2.5rem;
+        }
+
+        /* HERO */
+        .hero {
+            animation: rise 0.5s ease both;
+        }
+
+        .wordmark {
+            font-size: clamp(2.8rem, 9vw, 4.2rem);
+            font-weight: 900;
+            letter-spacing: -0.05em;
+            line-height: 1;
+            color: #fafafa;
+        }
+
+        .wordmark em {
+            font-style: normal;
+            color: #a78bfa;
+        }
+
+        .tagline {
+            margin-top: 0.75rem;
+            font-size: 0.9rem;
+            color: #52525b;
+            font-weight: 400;
+            letter-spacing: 0.01em;
+        }
+
+        /* SECTION */
+        .section {
+            display: flex;
+            flex-direction: column;
+            gap: 0.35rem;
+            animation: rise 0.5s 0.08s ease both;
+        }
+
+        .section-label {
+            font-size: 0.68rem;
+            font-weight: 600;
+            letter-spacing: 0.1em;
+            text-transform: uppercase;
+            color: #3f3f46;
+            padding: 0 0 0.4rem 0;
+        }
+
+        /* CARD */
         .card {
-            background: #161b22;
-            border: 1px solid #30363d;
-            border-radius: 12px;
-            padding: 40px;
-            width: 250px;
-            text-align: center;
-            transition: transform 0.2s, border-color 0.2s;
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            padding: 0.85rem 1rem;
+            background: #111113;
+            border: 1px solid #1f1f23;
+            border-radius: 10px;
             text-decoration: none;
             color: inherit;
+            transition: background 0.15s, border-color 0.15s;
+            gap: 1rem;
         }
+
         .card:hover {
-            transform: translateY(-5px);
-            border-color: #58a6ff;
-            background: #1f242c;
+            background: #18181b;
+            border-color: #2e2e33;
         }
-        .icon { font-size: 4rem; margin-bottom: 20px; }
-        .title { font-size: 1.5rem; font-weight: bold; margin-bottom: 10px; }
-        .desc { font-size: 0.9rem; color: #8b949e; }
+
+        .card-left {
+            display: flex;
+            align-items: center;
+            gap: 0.85rem;
+            min-width: 0;
+        }
+
+        .dot {
+            width: 8px;
+            height: 8px;
+            border-radius: 50%;
+            flex-shrink: 0;
+        }
+
+        .card-info { min-width: 0; }
+
+        .card-name {
+            font-size: 0.9rem;
+            font-weight: 600;
+            color: #e4e4e7;
+            white-space: nowrap;
+            overflow: hidden;
+            text-overflow: ellipsis;
+        }
+
+        .card-sub {
+            font-size: 0.78rem;
+            color: #52525b;
+            margin-top: 1px;
+            white-space: nowrap;
+            overflow: hidden;
+            text-overflow: ellipsis;
+        }
+
+        .card-arrow {
+            color: #3f3f46;
+            font-size: 0.75rem;
+            flex-shrink: 0;
+            transition: color 0.15s, transform 0.15s;
+        }
+
+        .card:hover .card-arrow {
+            color: #71717a;
+            transform: translate(2px, -2px);
+        }
+
+        /* FOOTER */
+        .footer {
+            font-size: 0.72rem;
+            color: #27272a;
+            letter-spacing: 0.03em;
+            animation: rise 0.5s 0.16s ease both;
+        }
+
+        @keyframes rise {
+            from { opacity: 0; transform: translateY(12px); }
+            to   { opacity: 1; transform: translateY(0); }
+        }
+
+        @media (max-width: 480px) {
+            .wordmark { font-size: 2.8rem; }
+        }
     </style>
 </head>
 <body>
 
-    <h1>Engineering Mastery</h1>
+<div class="wrapper">
 
-    <div class="container">
-        <a href="./system-design/index.html" class="card">
-            <div class="icon">🏗️</div>
-            <div class="title">System Design</div>
-            <div class="desc">HLD, LLD, and Architecture Patterns</div>
-        </a>
+    <div class="hero">
+        <div class="wordmark">rev<em>Doc</em></div>
+        <p class="tagline">Pick a subject. Start the grind.</p>
+    </div>
+
+    <div class="section">
+        <div class="section-label">Subjects</div>
 
         <a href="./java-db/index.html" class="card">
-            <div class="icon">☕</div>
-            <div class="title">Java & DB</div>
-            <div class="desc">Core Java, Spring Boot, SQL & Internals</div>
+            <div class="card-left">
+                <div class="dot" style="background:#f97316;"></div>
+                <div class="card-info">
+                    <div class="card-name">Java & DB</div>
+                    <div class="card-sub">Core Java · Spring Boot · SQL · Hibernate</div>
+                </div>
+            </div>
+            <svg class="card-arrow" width="14" height="14" viewBox="0 0 14 14" fill="none">
+                <path d="M3 11L11 3M11 3H5M11 3V9" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"/>
+            </svg>
         </a>
+
+        <a href="./system-design/index.html" class="card">
+            <div class="card-left">
+                <div class="dot" style="background:#a78bfa;"></div>
+                <div class="card-info">
+                    <div class="card-name">System Design</div>
+                    <div class="card-sub">HLD · LLD · UML · Architecture Patterns</div>
+                </div>
+            </div>
+            <svg class="card-arrow" width="14" height="14" viewBox="0 0 14 14" fill="none">
+                <path d="M3 11L11 3M11 3H5M11 3V9" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"/>
+            </svg>
+        </a>
+
+        <a href="./multi-threading/Java-Multithreading.html" class="card">
+            <div class="card-left">
+                <div class="dot" style="background:#22d3ee;"></div>
+                <div class="card-info">
+                    <div class="card-name">Multithreading</div>
+                    <div class="card-sub">Threads · Concurrency · Locks · Executors</div>
+                </div>
+            </div>
+            <svg class="card-arrow" width="14" height="14" viewBox="0 0 14 14" fill="none">
+                <path d="M3 11L11 3M11 3H5M11 3V9" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"/>
+            </svg>
+        </a>
+
     </div>
+
+    <div class="footer">revDoc &nbsp;·&nbsp; built for the grind</div>
+
+</div>
 
 </body>
 </html>
