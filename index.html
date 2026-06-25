@@ -117,6 +117,30 @@
             flex-shrink: 0;
         }
 
+        .card-icon {
+            width: 38px;
+            height: 38px;
+            border-radius: 9px;
+            flex-shrink: 0;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            color: var(--accent);
+            background: color-mix(in srgb, var(--accent) 13%, transparent);
+            border: 1px solid color-mix(in srgb, var(--accent) 32%, transparent);
+            transition: background 0.15s, border-color 0.15s;
+        }
+
+        .card-icon svg {
+            width: 19px;
+            height: 19px;
+        }
+
+        .card:hover .card-icon {
+            background: color-mix(in srgb, var(--accent) 20%, transparent);
+            border-color: color-mix(in srgb, var(--accent) 50%, transparent);
+        }
+
         .card-info { min-width: 0; }
 
         .card-name {
@@ -181,7 +205,13 @@
 
         <a href="./java-db/index.html" class="card">
             <div class="card-left">
-                <div class="dot" style="background:#f97316;"></div>
+                <div class="card-icon" style="--accent:#f97316;">
+                    <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                        <ellipse cx="12" cy="5" rx="8" ry="3"/>
+                        <path d="M4 5v6c0 1.66 3.58 3 8 3s8-1.34 8-3V5"/>
+                        <path d="M4 11v6c0 1.66 3.58 3 8 3s8-1.34 8-3v-6"/>
+                    </svg>
+                </div>
                 <div class="card-info">
                     <div class="card-name">Java & DB</div>
                     <div class="card-sub">Core Java · Spring Boot · SQL · Hibernate</div>
@@ -194,7 +224,13 @@
 
         <a href="./system-design/index.html" class="card">
             <div class="card-left">
-                <div class="dot" style="background:#a78bfa;"></div>
+                <div class="card-icon" style="--accent:#a78bfa;">
+                    <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                        <polygon points="12 2 2 7 12 12 22 7 12 2"/>
+                        <polyline points="2 17 12 22 22 17"/>
+                        <polyline points="2 12 12 17 22 12"/>
+                    </svg>
+                </div>
                 <div class="card-info">
                     <div class="card-name">System Design</div>
                     <div class="card-sub">HLD · LLD · UML · Architecture Patterns</div>
@@ -205,12 +241,82 @@
             </svg>
         </a>
 
+    </div>
+
+    <div class="section">
+        <div class="section-label">Topics</div>
+
         <a href="./multi-threading/index.html" class="card">
             <div class="card-left">
-                <div class="dot" style="background:#22d3ee;"></div>
+                <div class="card-icon" style="--accent:#22d3ee;">
+                    <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                        <line x1="6" y1="3" x2="6" y2="15"/>
+                        <circle cx="18" cy="6" r="3"/>
+                        <circle cx="6" cy="18" r="3"/>
+                        <path d="M18 9a9 9 0 0 1-9 9"/>
+                    </svg>
+                </div>
                 <div class="card-info">
                     <div class="card-name">Multithreading</div>
                     <div class="card-sub">Threads · Concurrency · Locks · Executors</div>
+                </div>
+            </div>
+            <svg class="card-arrow" width="14" height="14" viewBox="0 0 14 14" fill="none">
+                <path d="M3 11L11 3M11 3H5M11 3V9" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"/>
+            </svg>
+        </a>
+
+        <a href="./kafka/index.html" class="card">
+            <div class="card-left">
+                <div class="card-icon" style="--accent:#4ade80;">
+                    <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                        <circle cx="18" cy="5" r="3"/>
+                        <circle cx="6" cy="12" r="3"/>
+                        <circle cx="18" cy="19" r="3"/>
+                        <line x1="8.59" y1="13.51" x2="15.42" y2="17.49"/>
+                        <line x1="15.41" y1="6.51" x2="8.59" y2="10.49"/>
+                    </svg>
+                </div>
+                <div class="card-info">
+                    <div class="card-name">Kafka</div>
+                    <div class="card-sub">Topics · Partitions · Streams · Connect</div>
+                </div>
+            </div>
+            <svg class="card-arrow" width="14" height="14" viewBox="0 0 14 14" fill="none">
+                <path d="M3 11L11 3M11 3H5M11 3V9" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"/>
+            </svg>
+        </a>
+
+        <a href="./redis/index.html" class="card">
+            <div class="card-left">
+                <div class="card-icon" style="--accent:#fb7185;">
+                    <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                        <polygon points="13 2 3 14 12 14 11 22 21 10 12 10 13 2"/>
+                    </svg>
+                </div>
+                <div class="card-info">
+                    <div class="card-name">Redis</div>
+                    <div class="card-sub">Data Types · Caching · Persistence · Cluster</div>
+                </div>
+            </div>
+            <svg class="card-arrow" width="14" height="14" viewBox="0 0 14 14" fill="none">
+                <path d="M3 11L11 3M11 3H5M11 3V9" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"/>
+            </svg>
+        </a>
+
+        <a href="./design-patterns/index.html" class="card">
+            <div class="card-left">
+                <div class="card-icon" style="--accent:#818cf8;">
+                    <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                        <rect x="3" y="3" width="7" height="7" rx="1"/>
+                        <rect x="14" y="3" width="7" height="7" rx="1"/>
+                        <rect x="14" y="14" width="7" height="7" rx="1"/>
+                        <rect x="3" y="14" width="7" height="7" rx="1"/>
+                    </svg>
+                </div>
+                <div class="card-info">
+                    <div class="card-name">Design Patterns</div>
+                    <div class="card-sub">Creational · Structural · Behavioral · GoF</div>
                 </div>
             </div>
             <svg class="card-arrow" width="14" height="14" viewBox="0 0 14 14" fill="none">
