@@ -19,6 +19,54 @@ window.CONTENT = {
 
   levels: [
     /* ========================================================
+       PHASE 0 — Why Kafka?
+       ======================================================== */
+    {
+      id: 'phase-0', num: '00', accent: 'rose', part: 'Context',
+      eyebrow: 'Start Here · The Why',
+      title: 'Why Kafka?',
+      intro: 'Before the mechanics, the motivation. Kafka exists to solve a specific, painful problem that shows up in every growing system — and understanding that problem is exactly what tells you when to reach for Kafka (and when not to).',
+      blocks: [
+        { t: 'sub', text: 'The problem — integration spaghetti' },
+        { t: 'prose', html: `As a system grows, every service needs other services' data. The naive fix is <strong>point-to-point integration</strong>: Orders calls Email directly, Payments writes to Analytics directly, everyone queries everyone. With N services you head toward <strong>N×M brittle connections</strong> — a tangle where one schema change ripples everywhere, a slow consumer backs up its producer, and the primary database gets hammered by every system that needs a copy of the data.` },
+        { t: 'list', items: [
+          `<strong>Tight coupling</strong> — every producer must know every consumer's address, format, and whether it's even online.`,
+          `<strong>No replay</strong> — once a message is delivered (or lost) it's gone; you can't reprocess history or onboard a new consumer with old data.`,
+          `<strong>Database overload</strong> — every downstream system polling the primary DB for changes piles load onto the one thing you can least afford to slow down.`,
+          `<strong>Batch latency</strong> — nightly ETL means insights are hours stale; there's no real-time path.`,
+          `<strong>Fragile backpressure</strong> — one slow or down consumer blocks or breaks the producer.`,
+        ] },
+        { t: 'diagram', name: 'pointToPoint', cap: 'Point-to-point integration explodes into N×M connections; Kafka collapses it to one hub' },
+
+        { t: 'sub', text: 'What Kafka solved — and how' },
+        { t: 'prose', html: `Kafka inserts a single, durable, append-only <strong>commit log</strong> between everyone — a "central nervous system" for your data. Producers publish an event <em>once</em> to a topic and walk away; any number of consumers subscribe independently and read at their own pace. The mechanism is deceptively simple: an ordered log on disk, written and read <strong>sequentially</strong>, replicated across brokers.` },
+        { t: 'list', items: [
+          `<strong>Decoupling</strong> — producers and consumers never talk directly. Add a new consumer without touching any producer.`,
+          `<strong>Durability + replay</strong> — events are retained (not deleted on read), so you can rewind, reprocess, or bootstrap a brand-new service from history.`,
+          `<strong>Throughput</strong> — sequential disk I/O, zero-copy, and batching push millions of messages/sec on modest hardware.`,
+          `<strong>Scale &amp; resilience</strong> — partitions spread load horizontally; replication survives broker failure (Phase 2).`,
+          `<strong>Buffering</strong> — the log absorbs spikes; a slow consumer simply lags behind instead of breaking the producer.`,
+          `<strong>One source of event truth</strong> — every system reads the same ordered stream rather than N drifting copies.`,
+        ] },
+        { t: 'callout', kind: 'key', html: `<strong>The core shift:</strong> from "services calling services" to "services publishing and subscribing to a shared log". That one move — a durable log in the middle — buys you decoupling, replay, and real-time all at once.` },
+
+        { t: 'sub', text: 'Where it is used — and how' },
+        { t: 'prose', html: `The same append-only log powers wildly different use cases. The "how" is always the same shape: <strong>produce events to a topic, consume them somewhere useful.</strong>` },
+        { t: 'cards', cols: 2, items: [
+          { title: 'Event-driven microservices', body: `<strong>How:</strong> services emit domain events ("OrderPlaced") to topics; others react. Replaces brittle REST call-chains with loose, async coupling.` },
+          { title: 'Real-time analytics', body: `<strong>How:</strong> stream clickstreams and app metrics into Kafka, process with Streams/Flink, and power live dashboards or fraud detection.` },
+          { title: 'Log & data aggregation', body: `<strong>How:</strong> funnel logs/events from many services into one topic, then fan out to Elasticsearch, S3, or a warehouse via Kafka Connect.` },
+          { title: 'Database sync (CDC)', body: `<strong>How:</strong> Debezium streams a database's change log into Kafka, keeping caches, search indexes, and other DBs in sync in real time.` },
+          { title: 'Event sourcing', body: `<strong>How:</strong> store every state change as an immutable event; rebuild state — or a whole new read model — by replaying from offset 0.` },
+          { title: 'Stream processing / ETL', body: `<strong>How:</strong> transform, join, and aggregate streams in flight with Kafka Streams (Phase 9) instead of slow nightly batch jobs.` },
+          { title: 'Messaging & job queues', body: `<strong>How:</strong> topics + consumer groups act as a durable, replayable work queue with built-in load balancing and at-least-once delivery.` },
+          { title: 'Metrics & IoT ingestion', body: `<strong>How:</strong> millions of devices publish telemetry to partitioned topics; consumers aggregate it without overwhelming any single database.` },
+        ] },
+        { t: 'callout', kind: 'note', html: `<strong>When NOT to reach for Kafka:</strong> tiny apps with a few services (the operational overhead isn't worth it), simple request/response RPC (use HTTP/gRPC), or when you need a classic transactional queue with per-message priority and TTL — a traditional broker may fit better. Kafka shines at <em>scale</em> and <em>streaming</em>.` },
+      ],
+    },
+
+    /* ========================================================
        PHASE 1 — Core Mechanics
        ======================================================== */
     {

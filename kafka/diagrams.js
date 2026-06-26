@@ -5,6 +5,51 @@
    ============================================================ */
 window.DIAGRAMS = {
 
+  /* ---------- Phase 0: point-to-point spaghetti vs a Kafka hub ---------- */
+  pointToPoint: `
+<svg viewBox="0 0 700 230" xmlns="http://www.w3.org/2000/svg">
+  <text x="175" y="22" fill="var(--rose)" font-size="12" font-weight="700" text-anchor="middle">Before — point-to-point spaghetti</text>
+  <rect x="40" y="45" width="84" height="30" rx="7" fill="#0e1422" stroke="var(--rose)"/>
+  <text x="82" y="65" fill="var(--rose)" font-size="9" text-anchor="middle">Orders</text>
+  <rect x="40" y="100" width="84" height="30" rx="7" fill="#0e1422" stroke="var(--rose)"/>
+  <text x="82" y="120" fill="var(--rose)" font-size="9" text-anchor="middle">Payments</text>
+  <rect x="40" y="155" width="84" height="30" rx="7" fill="#0e1422" stroke="var(--rose)"/>
+  <text x="82" y="175" fill="var(--rose)" font-size="9" text-anchor="middle">Inventory</text>
+  <rect x="226" y="45" width="84" height="30" rx="7" fill="#0e1422" stroke="var(--rose)"/>
+  <text x="268" y="65" fill="var(--rose)" font-size="9" text-anchor="middle">Email</text>
+  <rect x="226" y="100" width="84" height="30" rx="7" fill="#0e1422" stroke="var(--rose)"/>
+  <text x="268" y="120" fill="var(--rose)" font-size="9" text-anchor="middle">Analytics</text>
+  <rect x="226" y="155" width="84" height="30" rx="7" fill="#0e1422" stroke="var(--rose)"/>
+  <text x="268" y="175" fill="var(--rose)" font-size="9" text-anchor="middle">Search</text>
+  <g stroke="var(--rose)" stroke-opacity="0.4">
+    <line x1="124" y1="60" x2="226" y2="60"/><line x1="124" y1="60" x2="226" y2="115"/><line x1="124" y1="60" x2="226" y2="170"/>
+    <line x1="124" y1="115" x2="226" y2="60"/><line x1="124" y1="115" x2="226" y2="115"/><line x1="124" y1="115" x2="226" y2="170"/>
+    <line x1="124" y1="170" x2="226" y2="60"/><line x1="124" y1="170" x2="226" y2="115"/><line x1="124" y1="170" x2="226" y2="170"/>
+  </g>
+  <text x="175" y="208" fill="var(--text-3)" font-size="9.5" text-anchor="middle">N×M brittle connections · tight coupling</text>
+
+  <line x1="360" y1="20" x2="360" y2="210" stroke="var(--line-2)" stroke-dasharray="4 4"/>
+
+  <text x="525" y="22" fill="var(--green)" font-size="12" font-weight="700" text-anchor="middle">After — one Kafka hub</text>
+  <rect x="478" y="95" width="94" height="44" rx="10" fill="rgba(251,191,36,0.1)" stroke="var(--amber)"/>
+  <text x="525" y="121" fill="var(--amber)" font-size="11" font-weight="700" text-anchor="middle">Kafka</text>
+  <rect x="410" y="40" width="78" height="26" rx="6" fill="#0e1422" stroke="var(--teal)"/>
+  <text x="449" y="57" fill="var(--teal)" font-size="8.5" text-anchor="middle">Orders</text>
+  <rect x="410" y="168" width="78" height="26" rx="6" fill="#0e1422" stroke="var(--teal)"/>
+  <text x="449" y="185" fill="var(--teal)" font-size="8.5" text-anchor="middle">Payments</text>
+  <rect x="565" y="40" width="90" height="26" rx="6" fill="#0e1422" stroke="var(--purple)"/>
+  <text x="610" y="57" fill="var(--purple)" font-size="8.5" text-anchor="middle">Analytics</text>
+  <rect x="565" y="95" width="90" height="26" rx="6" fill="#0e1422" stroke="var(--purple)"/>
+  <text x="610" y="112" fill="var(--purple)" font-size="8.5" text-anchor="middle">Email</text>
+  <rect x="565" y="168" width="90" height="26" rx="6" fill="#0e1422" stroke="var(--purple)"/>
+  <text x="610" y="185" fill="var(--purple)" font-size="8.5" text-anchor="middle">Search</text>
+  <g stroke="var(--green)" stroke-opacity="0.55">
+    <line x1="488" y1="53" x2="500" y2="100"/><line x1="488" y1="181" x2="500" y2="134"/>
+    <line x1="572" y1="100" x2="565" y2="53"/><line x1="572" y1="115" x2="565" y2="108"/><line x1="572" y1="125" x2="565" y2="181"/>
+  </g>
+  <text x="525" y="208" fill="var(--text-3)" font-size="9.5" text-anchor="middle">publish once · anyone subscribes · decoupled</text>
+</svg>`,
+
   /* ---------- Phase 1: append-only partition log ---------- */
   log: `
 <svg viewBox="0 0 700 200" xmlns="http://www.w3.org/2000/svg">
