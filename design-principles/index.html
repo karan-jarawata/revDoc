@@ -1,0 +1,47 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>Java Design Principles — The Complete Guide</title>
+  <meta name="description" content="A complete, visual guide to software design principles in Java — SOLID, plus the everyday heuristics (DRY, KISS, YAGNI, Law of Demeter, Fail-Fast, contracts). Diagrams, bad-vs-good code, and when each rule applies.">
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link rel="stylesheet" href="styles.css">
+</head>
+<body>
+  <div class="progress" id="progress"></div>
+  <button class="menu-btn" id="menuBtn" aria-label="Menu">☰</button>
+
+  <div class="app">
+    <aside class="sidebar" id="sidebar">
+      <div class="sidebar__head">
+        <button class="sidebar__toggle" id="collapseBtn" type="button" aria-label="Collapse sidebar" title="Collapse">«</button>
+        <div class="sidebar__mark" aria-hidden="true">DP</div>
+        <div class="sidebar__eyebrow">The Complete Guide</div>
+        <div class="sidebar__title">Design<br>Principles</div>
+        <div class="sidebar__badges">
+          <span class="badge">SOLID</span>
+          <span class="badge">Clean Code</span>
+        </div>
+      </div>
+      <nav class="sidebar__nav" id="nav"></nav>
+      <div class="sidebar__foot">
+        <b>Tip:</b> click any level to jump. Everything lives on one page — built for deep study and fast revision.
+      </div>
+    </aside>
+
+    <div class="scrim" id="scrim"></div>
+
+    <main class="main">
+      <div class="content" id="content"></div>
+    </main>
+  </div>
+
+  <button class="to-top" id="toTop" aria-label="Back to top">↑</button>
+
+  <script src="diagrams.js"></script>
+  <script src="content.js"></script>
+  <script src="app.js"></script>
+</body>
+</html>
