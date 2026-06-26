@@ -34,16 +34,14 @@
         .wrapper {
             position: relative;
             width: 100%;
-            max-width: 560px;
+            max-width: 600px;
             display: flex;
             flex-direction: column;
-            gap: 2.5rem;
+            gap: 2.25rem;
         }
 
-        /* HERO */
-        .hero {
-            animation: rise 0.5s ease both;
-        }
+        /* ── HERO ─────────────────────────────────────── */
+        .hero { animation: rise 0.45s ease both; }
 
         .wordmark {
             font-size: clamp(2.8rem, 9vw, 4.2rem);
@@ -53,49 +51,50 @@
             color: #fafafa;
         }
 
-        .wordmark em {
-            font-style: normal;
-            color: #a78bfa;
-        }
+        .wordmark em { font-style: normal; color: #a78bfa; }
 
         .tagline {
             margin-top: 0.75rem;
-            font-size: 0.9rem;
+            font-size: 0.875rem;
             color: #52525b;
             font-weight: 400;
             letter-spacing: 0.01em;
         }
 
-        /* SECTION */
+        /* ── SECTION ──────────────────────────────────── */
         .section {
             display: flex;
             flex-direction: column;
-            gap: 0.35rem;
-            animation: rise 0.5s 0.08s ease both;
+            gap: 0.3rem;
+            animation: rise 0.45s ease both;
         }
+        .section:nth-child(2) { animation-delay: 0.06s; }
+        .section:nth-child(3) { animation-delay: 0.10s; }
+        .section:nth-child(4) { animation-delay: 0.14s; }
+        .section:nth-child(5) { animation-delay: 0.18s; }
 
         .section-label {
-            font-size: 0.68rem;
-            font-weight: 600;
-            letter-spacing: 0.1em;
+            font-size: 0.65rem;
+            font-weight: 700;
+            letter-spacing: 0.11em;
             text-transform: uppercase;
             color: #3f3f46;
-            padding: 0 0 0.4rem 0;
+            padding: 0 0 0.45rem 0;
         }
 
-        /* CARD */
+        /* ── CARD ─────────────────────────────────────── */
         .card {
             display: flex;
             align-items: center;
             justify-content: space-between;
-            padding: 0.85rem 1rem;
+            padding: 0.8rem 1rem;
             background: #111113;
             border: 1px solid #1f1f23;
             border-radius: 10px;
             text-decoration: none;
             color: inherit;
             transition: background 0.15s, border-color 0.15s;
-            gap: 1rem;
+            gap: 0.75rem;
         }
 
         .card:hover {
@@ -103,48 +102,62 @@
             border-color: #2e2e33;
         }
 
+        /* Index-only variant */
+        .card--index {
+            border-style: dashed;
+            background: #0d0d0f;
+        }
+
+        .card--index:hover {
+            background: #111113;
+            border-color: color-mix(in srgb, var(--accent) 28%, #2e2e33);
+        }
+
         .card-left {
             display: flex;
             align-items: center;
-            gap: 0.85rem;
+            gap: 0.8rem;
             min-width: 0;
         }
 
-        .dot {
-            width: 8px;
-            height: 8px;
-            border-radius: 50%;
-            flex-shrink: 0;
-        }
-
         .card-icon {
-            width: 38px;
-            height: 38px;
+            width: 36px;
+            height: 36px;
             border-radius: 9px;
             flex-shrink: 0;
             display: flex;
             align-items: center;
             justify-content: center;
             color: var(--accent);
-            background: color-mix(in srgb, var(--accent) 13%, transparent);
-            border: 1px solid color-mix(in srgb, var(--accent) 32%, transparent);
+            background: color-mix(in srgb, var(--accent) 11%, transparent);
+            border: 1px solid color-mix(in srgb, var(--accent) 28%, transparent);
             transition: background 0.15s, border-color 0.15s;
         }
 
-        .card-icon svg {
-            width: 19px;
-            height: 19px;
+        .card--index .card-icon {
+            opacity: 0.7;
         }
 
+        .card-icon svg { width: 17px; height: 17px; }
+
         .card:hover .card-icon {
-            background: color-mix(in srgb, var(--accent) 20%, transparent);
-            border-color: color-mix(in srgb, var(--accent) 50%, transparent);
+            background: color-mix(in srgb, var(--accent) 18%, transparent);
+            border-color: color-mix(in srgb, var(--accent) 46%, transparent);
         }
+
+        .card--index:hover .card-icon { opacity: 1; }
 
         .card-info { min-width: 0; }
 
+        .card-name-row {
+            display: flex;
+            align-items: center;
+            gap: 0.5rem;
+            flex-wrap: nowrap;
+        }
+
         .card-name {
-            font-size: 0.9rem;
+            font-size: 0.875rem;
             font-weight: 600;
             color: #e4e4e7;
             white-space: nowrap;
@@ -152,42 +165,72 @@
             text-overflow: ellipsis;
         }
 
+        .card--index .card-name { color: #a1a1aa; }
+
+        /* "Index" badge on topic-list-only cards */
+        .badge-index {
+            display: inline-flex;
+            align-items: center;
+            gap: 0.3rem;
+            font-size: 0.6rem;
+            font-weight: 700;
+            letter-spacing: 0.07em;
+            text-transform: uppercase;
+            color: #a16207;
+            background: rgba(202,138,4,0.09);
+            border: 1px solid rgba(202,138,4,0.22);
+            border-radius: 4px;
+            padding: 2px 7px;
+            white-space: nowrap;
+            flex-shrink: 0;
+        }
+
+        .badge-index::before {
+            content: '';
+            display: inline-block;
+            width: 5px;
+            height: 5px;
+            border-radius: 50%;
+            background: #a16207;
+            opacity: 0.8;
+        }
+
         .card-sub {
-            font-size: 0.78rem;
-            color: #52525b;
-            margin-top: 1px;
+            font-size: 0.75rem;
+            color: #3f3f46;
+            margin-top: 2px;
             white-space: nowrap;
             overflow: hidden;
             text-overflow: ellipsis;
         }
 
         .card-arrow {
-            color: #3f3f46;
-            font-size: 0.75rem;
+            color: #2e2e33;
             flex-shrink: 0;
             transition: color 0.15s, transform 0.15s;
         }
 
         .card:hover .card-arrow {
-            color: #71717a;
+            color: #52525b;
             transform: translate(2px, -2px);
         }
 
-        /* FOOTER */
+        /* ── FOOTER ───────────────────────────────────── */
         .footer {
-            font-size: 0.72rem;
+            font-size: 0.7rem;
             color: #27272a;
             letter-spacing: 0.03em;
-            animation: rise 0.5s 0.16s ease both;
+            animation: rise 0.45s 0.22s ease both;
         }
 
         @keyframes rise {
-            from { opacity: 0; transform: translateY(12px); }
+            from { opacity: 0; transform: translateY(10px); }
             to   { opacity: 1; transform: translateY(0); }
         }
 
         @media (max-width: 480px) {
             .wordmark { font-size: 2.8rem; }
+            .card-sub { display: none; }
         }
     </style>
 </head>
@@ -200,20 +243,43 @@
         <p class="tagline">Pick a subject. Start the grind.</p>
     </div>
 
+    <!-- ── Java & JVM ─────────────────────────────────── -->
     <div class="section">
-        <div class="section-label">Subjects</div>
+        <div class="section-label">Java &amp; JVM</div>
 
-        <a href="./java-db/index.html" class="card">
+        <a href="./springboot/index.html" class="card" style="--accent:#6ee7b7;">
             <div class="card-left">
-                <div class="card-icon" style="--accent:#f97316;">
+                <div class="card-icon">
                     <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
-                        <ellipse cx="12" cy="5" rx="8" ry="3"/>
-                        <path d="M4 5v6c0 1.66 3.58 3 8 3s8-1.34 8-3V5"/>
-                        <path d="M4 11v6c0 1.66 3.58 3 8 3s8-1.34 8-3v-6"/>
+                        <path d="M12 22s8-4 8-10V5l-8-3-8 3v7c0 6 8 10 8 10z"/>
                     </svg>
                 </div>
                 <div class="card-info">
-                    <div class="card-name">Java </div>
+                    <div class="card-name-row"><span class="card-name">Spring Boot</span></div>
+                    <div class="card-sub">IoC · REST · JPA · Security · Microservices</div>
+                </div>
+            </div>
+            <svg class="card-arrow" width="14" height="14" viewBox="0 0 14 14" fill="none">
+                <path d="M3 11L11 3M11 3H5M11 3V9" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"/>
+            </svg>
+        </a>
+
+        <a href="./java-db/index.html" class="card card--index" style="--accent:#f97316;">
+            <div class="card-left">
+                <div class="card-icon">
+                    <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                        <path d="M17 8h1a4 4 0 1 1 0 8h-1"/>
+                        <path d="M3 8h14v9a4 4 0 0 1-4 4H7a4 4 0 0 1-4-4Z"/>
+                        <line x1="6" y1="2" x2="6" y2="4"/>
+                        <line x1="10" y1="2" x2="10" y2="4"/>
+                        <line x1="14" y1="2" x2="14" y2="4"/>
+                    </svg>
+                </div>
+                <div class="card-info">
+                    <div class="card-name-row">
+                        <span class="card-name">Java</span>
+                        <span class="badge-index">Index only</span>
+                    </div>
                     <div class="card-sub">Core Java · Spring Boot · SQL · Hibernate</div>
                 </div>
             </div>
@@ -222,18 +288,19 @@
             </svg>
         </a>
 
-        <a href="./system-design/index.html" class="card">
+        <a href="./multi-threading/index.html" class="card" style="--accent:#22d3ee;">
             <div class="card-left">
-                <div class="card-icon" style="--accent:#a78bfa;">
+                <div class="card-icon">
                     <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
-                        <polygon points="12 2 2 7 12 12 22 7 12 2"/>
-                        <polyline points="2 17 12 22 22 17"/>
-                        <polyline points="2 12 12 17 22 12"/>
+                        <line x1="6" y1="3" x2="6" y2="15"/>
+                        <circle cx="18" cy="6" r="3"/>
+                        <circle cx="6" cy="18" r="3"/>
+                        <path d="M18 9a9 9 0 0 1-9 9"/>
                     </svg>
                 </div>
                 <div class="card-info">
-                    <div class="card-name">System Design</div>
-                    <div class="card-sub">HLD · LLD · UML · Architecture Patterns</div>
+                    <div class="card-name-row"><span class="card-name">Multithreading</span></div>
+                    <div class="card-sub">Threads · Concurrency · Locks · Executors</div>
                 </div>
             </div>
             <svg class="card-arrow" width="14" height="14" viewBox="0 0 14 14" fill="none">
@@ -243,32 +310,13 @@
 
     </div>
 
+    <!-- ── Distributed Systems ────────────────────────── -->
     <div class="section">
-        <div class="section-label">Topics</div>
+        <div class="section-label">Distributed Systems</div>
 
-        <a href="./multi-threading/index.html" class="card">
+        <a href="./kafka/index.html" class="card" style="--accent:#4ade80;">
             <div class="card-left">
-                <div class="card-icon" style="--accent:#22d3ee;">
-                    <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
-                        <line x1="6" y1="3" x2="6" y2="15"/>
-                        <circle cx="18" cy="6" r="3"/>
-                        <circle cx="6" cy="18" r="3"/>
-                        <path d="M18 9a9 9 0 0 1-9 9"/>
-                    </svg>
-                </div>
-                <div class="card-info">
-                    <div class="card-name">Multithreading</div>
-                    <div class="card-sub">Threads · Concurrency · Locks · Executors</div>
-                </div>
-            </div>
-            <svg class="card-arrow" width="14" height="14" viewBox="0 0 14 14" fill="none">
-                <path d="M3 11L11 3M11 3H5M11 3V9" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"/>
-            </svg>
-        </a>
-
-        <a href="./kafka/index.html" class="card">
-            <div class="card-left">
-                <div class="card-icon" style="--accent:#4ade80;">
+                <div class="card-icon">
                     <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
                         <circle cx="18" cy="5" r="3"/>
                         <circle cx="6" cy="12" r="3"/>
@@ -278,8 +326,8 @@
                     </svg>
                 </div>
                 <div class="card-info">
-                    <div class="card-name">Kafka</div>
-                    <div class="card-sub">Topics · Partitions · Streams · Connect</div>
+                    <div class="card-name-row"><span class="card-name">Kafka</span></div>
+                    <div class="card-sub">Topics · Partitions · Streams · Consumer Groups</div>
                 </div>
             </div>
             <svg class="card-arrow" width="14" height="14" viewBox="0 0 14 14" fill="none">
@@ -287,15 +335,15 @@
             </svg>
         </a>
 
-        <a href="./redis/index.html" class="card">
+        <a href="./redis/index.html" class="card" style="--accent:#fb7185;">
             <div class="card-left">
-                <div class="card-icon" style="--accent:#fb7185;">
+                <div class="card-icon">
                     <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
                         <polygon points="13 2 3 14 12 14 11 22 21 10 12 10 13 2"/>
                     </svg>
                 </div>
                 <div class="card-info">
-                    <div class="card-name">Redis</div>
+                    <div class="card-name-row"><span class="card-name">Redis</span></div>
                     <div class="card-sub">Data Types · Caching · Persistence · Cluster</div>
                 </div>
             </div>
@@ -304,9 +352,80 @@
             </svg>
         </a>
 
-        <a href="./design-patterns/index.html" class="card">
+    </div>
+
+    <!-- ── Observability ──────────────────────────────── -->
+    <div class="section">
+        <div class="section-label">Observability</div>
+
+        <a href="./application-metrics/index.html" class="card" style="--accent:#38bdf8;">
             <div class="card-left">
-                <div class="card-icon" style="--accent:#818cf8;">
+                <div class="card-icon">
+                    <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                        <polyline points="22 12 18 12 15 21 9 3 6 12 2 12"/>
+                    </svg>
+                </div>
+                <div class="card-info">
+                    <div class="card-name-row"><span class="card-name">Application Metrics</span></div>
+                    <div class="card-sub">Actuator · Micrometer · Prometheus · Grafana</div>
+                </div>
+            </div>
+            <svg class="card-arrow" width="14" height="14" viewBox="0 0 14 14" fill="none">
+                <path d="M3 11L11 3M11 3H5M11 3V9" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"/>
+            </svg>
+        </a>
+
+        <a href="./elk-stack/index.html" class="card" style="--accent:#fbbf24;">
+            <div class="card-left">
+                <div class="card-icon">
+                    <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                        <circle cx="11" cy="11" r="8"/>
+                        <line x1="21" y1="21" x2="16.65" y2="16.65"/>
+                        <line x1="11" y1="8" x2="11" y2="14"/>
+                        <line x1="8" y1="11" x2="14" y2="11"/>
+                    </svg>
+                </div>
+                <div class="card-info">
+                    <div class="card-name-row"><span class="card-name">ELK Stack</span></div>
+                    <div class="card-sub">Elasticsearch · Logstash · Kibana · Beats</div>
+                </div>
+            </div>
+            <svg class="card-arrow" width="14" height="14" viewBox="0 0 14 14" fill="none">
+                <path d="M3 11L11 3M11 3H5M11 3V9" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"/>
+            </svg>
+        </a>
+
+    </div>
+
+    <!-- ── Architecture & Design ─────────────────────── -->
+    <div class="section">
+        <div class="section-label">Architecture &amp; Design</div>
+
+        <a href="./system-design/index.html" class="card card--index" style="--accent:#a78bfa;">
+            <div class="card-left">
+                <div class="card-icon">
+                    <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                        <polygon points="12 2 2 7 12 12 22 7 12 2"/>
+                        <polyline points="2 17 12 22 22 17"/>
+                        <polyline points="2 12 12 17 22 12"/>
+                    </svg>
+                </div>
+                <div class="card-info">
+                    <div class="card-name-row">
+                        <span class="card-name">System Design</span>
+                        <span class="badge-index">Index only</span>
+                    </div>
+                    <div class="card-sub">HLD · LLD · UML · Architecture Patterns</div>
+                </div>
+            </div>
+            <svg class="card-arrow" width="14" height="14" viewBox="0 0 14 14" fill="none">
+                <path d="M3 11L11 3M11 3H5M11 3V9" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"/>
+            </svg>
+        </a>
+
+        <a href="./design-patterns/index.html" class="card" style="--accent:#818cf8;">
+            <div class="card-left">
+                <div class="card-icon">
                     <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
                         <rect x="3" y="3" width="7" height="7" rx="1"/>
                         <rect x="14" y="3" width="7" height="7" rx="1"/>
@@ -315,7 +434,7 @@
                     </svg>
                 </div>
                 <div class="card-info">
-                    <div class="card-name">Design Patterns</div>
+                    <div class="card-name-row"><span class="card-name">Design Patterns</span></div>
                     <div class="card-sub">Creational · Structural · Behavioral · GoF</div>
                 </div>
             </div>
@@ -324,16 +443,16 @@
             </svg>
         </a>
 
-        <a href="./design-principles/index.html" class="card">
+        <a href="./design-principles/index.html" class="card" style="--accent:#f472b6;">
             <div class="card-left">
-                <div class="card-icon" style="--accent:#f472b6;">
+                <div class="card-icon">
                     <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
                         <path d="M12 3l7 4v5c0 4.5-3 7.5-7 9-4-1.5-7-4.5-7-9V7l7-4z"/>
                         <path d="M9 12l2 2 4-4"/>
                     </svg>
                 </div>
                 <div class="card-info">
-                    <div class="card-name">Design Principles</div>
+                    <div class="card-name-row"><span class="card-name">Design Principles</span></div>
                     <div class="card-sub">SOLID · DRY · KISS · YAGNI · Clean Code</div>
                 </div>
             </div>
