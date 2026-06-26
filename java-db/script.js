@@ -1,15 +1,8 @@
 // ================= DATA & GLOBALS =================
 let JAVA_DATA = [];
-let DB_DATA = [];
 let TOPIC_DETAILS = {};
 
-const CONFIG = {
-    mode: localStorage.getItem('app_mode') || 'JAVA',
-};
-
-// Updated LocalStorage keys so they don't clash with previous version
 let javaState = JSON.parse(localStorage.getItem('java_master_state')) || { activeTab: 0, completed: {} };
-let dbState = JSON.parse(localStorage.getItem('db_master_state')) || { activeTab: 0, completed: {} };
 
 // ================= INIT & FETCH =================
 async function loadDataAndInit() {
@@ -19,14 +12,12 @@ async function loadDataAndInit() {
         // 1. Force Fresh Data (Cache Busting)
         const t = Date.now();
         
-        const [javaRes, dbRes, detailsRes] = await Promise.all([
+        const [javaRes, detailsRes] = await Promise.all([
             fetch(`data/java.json?t=${t}`),
-            fetch(`data/db.json?t=${t}`),
             fetch(`data/details.json?t=${t}`)
         ]);
 
         // 2. Debugging Helper Function
-        // This safely checks if the file is empty before crashing
         const safeJsonParse = async (response, name) => {
             const text = await response.text(); 
             if (!text || text.trim() === "") {
@@ -40,7 +31,6 @@ async function loadDataAndInit() {
         };
 
         JAVA_DATA = await safeJsonParse(javaRes, "java.json");
-        DB_DATA = await safeJsonParse(dbRes, "db.json");
         TOPIC_DETAILS = await safeJsonParse(detailsRes, "details.json");
 
         initDashboard();
@@ -48,27 +38,22 @@ async function loadDataAndInit() {
     } catch (error) {
         console.error("Error loading data:", error);
         document.getElementById('headerTitle').innerText = "Load Failed";
-        // Show the actual error on screen so you can see it
         document.getElementById('headerSubtitle').innerText = error.message; 
         document.getElementById('headerSubtitle').style.color = "#ff4444";
     }
 }
 
-function getData() { return CONFIG.mode === 'JAVA' ? JAVA_DATA : DB_DATA; }
-function getState() { return CONFIG.mode === 'JAVA' ? javaState : dbState; }
+function getData() { return JAVA_DATA; }
+function getState() { return javaState; }
 function saveState() {
-    if(CONFIG.mode === 'JAVA') localStorage.setItem('java_master_state', JSON.stringify(javaState));
-    else localStorage.setItem('db_master_state', JSON.stringify(dbState));
+    localStorage.setItem('java_master_state', JSON.stringify(javaState));
 }
 
 // ================= DASHBOARD LOGIC =================
 function initDashboard() {
-    document.body.setAttribute('data-mode', CONFIG.mode);
-
     if (window.innerWidth <= 768) {
         document.querySelector('aside').classList.add('closed');
     }
-    updateModeToggleUI();
     renderNav();
     renderContent();
 }
@@ -80,7 +65,6 @@ function renderNav() {
     
     nav.innerHTML = '';
     
-    // Safety check if data isn't loaded yet
     if(!data) return;
 
     data.forEach((section, idx) => {
@@ -374,45 +358,10 @@ function toggleSidebar() {
     sidebar.classList.toggle('closed');
 }
 
-// ================= MODE SWITCH LOGIC =================
-function setMode(selectedMode) {
-    if (CONFIG.mode === selectedMode) return; 
-
-    CONFIG.mode = selectedMode;
-    localStorage.setItem('app_mode', CONFIG.mode);
-
-    document.body.style.opacity = '0';
-    
-    setTimeout(() => {
-        initDashboard(); 
-        document.body.style.opacity = '1';
-        
-        confetti({ 
-            particleCount: 60, spread: 70, origin: { x: 0.1, y: 0.1 }, 
-            colors: CONFIG.mode === 'JAVA' ? ['#f97316'] : ['#0d9488'] 
-        });
-    }, 250);
-}
-
-function updateModeToggleUI() {
-    const javaBtn = document.getElementById('brand-java');
-    const dbBtn = document.getElementById('brand-db');
-    
-    if(!javaBtn || !dbBtn) return;
-
-    javaBtn.classList.remove('active');
-    dbBtn.classList.remove('active');
-
-    if (CONFIG.mode === 'JAVA') {
-        javaBtn.classList.add('active');
-    } else {
-        dbBtn.classList.add('active');
-    }
-}
 
 // ================= BOOTSTRAP & CONFETTI =================
 function triggerSmallConfetti(x, y) {
-    const color = CONFIG.mode === 'JAVA' ? '#f97316' : '#0d9488';
+    const color = '#f97316';
     confetti({
         particleCount: 40, spread: 60, origin: { x: x, y: y },
         colors: [color, '#ffffff'], disableForReducedMotion: true, gravity: 1.2, scalar: 0.7
@@ -420,7 +369,7 @@ function triggerSmallConfetti(x, y) {
 }
 
 function triggerSectionComplete() {
-    const color = CONFIG.mode === 'JAVA' ? '#f97316' : '#0d9488';
+    const color = '#f97316';
     const end = Date.now() + 1000;
 
     (function frame() {
@@ -434,7 +383,7 @@ function triggerExtremeCelebration() {
     const duration = 8000;
     const animationEnd = Date.now() + duration;
     const defaults = { startVelocity: 30, spread: 360, ticks: 60, zIndex: 0 };
-    const color = CONFIG.mode === 'JAVA' ? '#f97316' : '#0d9488';
+    const color = '#f97316';
 
     function randomInRange(min, max) { return Math.random() * (max - min) + min; }
 
