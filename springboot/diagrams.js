@@ -613,4 +613,160 @@ testingPyramid: `<svg viewBox="0 0 560 280" xmlns="http://www.w3.org/2000/svg" f
   <line x1="505" y1="250" x2="511" y2="250" stroke="var(--line-2)" stroke-width="1"/>
 </svg>`
 
+,
+
+/* ── 11. Mono vs Flux (Reactive) ─────────────────────────── */
+monoFlux: `<svg viewBox="0 0 660 240" xmlns="http://www.w3.org/2000/svg" font-family="Inter,sans-serif">
+  <defs>
+    <marker id="arr11" markerWidth="8" markerHeight="8" refX="6" refY="3" orient="auto">
+      <path d="M0,0 L0,6 L8,3 z" fill="var(--text-3)"/>
+    </marker>
+  </defs>
+
+  <!-- MONO section -->
+  <rect x="10" y="10" width="300" height="220" rx="10" fill="color-mix(in srgb,var(--teal) 8%,transparent)" stroke="var(--teal)" stroke-width="1.5"/>
+  <text x="160" y="38" text-anchor="middle" fill="var(--teal)" font-size="13" font-weight="700">Mono&lt;T&gt;</text>
+  <text x="160" y="56" text-anchor="middle" fill="var(--text-3)" font-size="10">0 or 1 element — like Optional but async</text>
+
+  <!-- Mono timeline -->
+  <line x1="30" y1="100" x2="290" y2="100" stroke="var(--line-2)" stroke-width="1.5" marker-end="url(#arr11)"/>
+  <text x="30" y="92" fill="var(--text-3)" font-size="9">subscribe</text>
+
+  <!-- Mono 0 elements (empty) -->
+  <text x="30" y="130" fill="var(--text-3)" font-size="9" font-weight="600">Empty:</text>
+  <line x1="80" y1="130" x2="240" y2="130" stroke="var(--line-2)" stroke-width="1" stroke-dasharray="3,3"/>
+  <text x="248" y="133" fill="var(--teal)" font-size="12" font-weight="700">|</text>
+  <text x="256" y="133" fill="var(--text-3)" font-size="9">complete</text>
+
+  <!-- Mono 1 element -->
+  <text x="30" y="158" fill="var(--text-3)" font-size="9" font-weight="600">Value:</text>
+  <line x1="80" y1="158" x2="240" y2="158" stroke="var(--line-2)" stroke-width="1" stroke-dasharray="3,3"/>
+  <circle cx="160" cy="158" r="10" fill="color-mix(in srgb,var(--teal) 30%,transparent)" stroke="var(--teal)" stroke-width="1.5"/>
+  <text x="160" y="162" text-anchor="middle" fill="var(--teal)" font-size="9" font-weight="700">T</text>
+  <text x="248" y="161" fill="var(--teal)" font-size="12" font-weight="700">|</text>
+
+  <!-- Mono error -->
+  <text x="30" y="190" fill="var(--text-3)" font-size="9" font-weight="600">Error:</text>
+  <line x1="80" y1="190" x2="200" y2="190" stroke="var(--line-2)" stroke-width="1" stroke-dasharray="3,3"/>
+  <text x="208" y="194" fill="var(--rose)" font-size="12" font-weight="700">✕</text>
+  <text x="222" y="193" fill="var(--rose)" font-size="9">onError</text>
+
+  <!-- FLUX section -->
+  <rect x="350" y="10" width="300" height="220" rx="10" fill="color-mix(in srgb,var(--blue) 8%,transparent)" stroke="var(--blue)" stroke-width="1.5"/>
+  <text x="500" y="38" text-anchor="middle" fill="var(--blue)" font-size="13" font-weight="700">Flux&lt;T&gt;</text>
+  <text x="500" y="56" text-anchor="middle" fill="var(--text-3)" font-size="10">0 to N elements — lazy async stream</text>
+
+  <!-- Flux timeline -->
+  <line x1="370" y1="100" x2="630" y2="100" stroke="var(--line-2)" stroke-width="1.5" marker-end="url(#arr11)"/>
+  <text x="370" y="92" fill="var(--text-3)" font-size="9">subscribe</text>
+
+  <!-- Flux empty -->
+  <text x="370" y="130" fill="var(--text-3)" font-size="9" font-weight="600">Empty:</text>
+  <line x1="418" y1="130" x2="580" y2="130" stroke="var(--line-2)" stroke-width="1" stroke-dasharray="3,3"/>
+  <text x="588" y="133" fill="var(--blue)" font-size="12" font-weight="700">|</text>
+
+  <!-- Flux multiple elements -->
+  <text x="370" y="158" fill="var(--text-3)" font-size="9" font-weight="600">Stream:</text>
+  <line x1="418" y1="158" x2="580" y2="158" stroke="var(--line-2)" stroke-width="1" stroke-dasharray="3,3"/>
+  <circle cx="440" cy="158" r="8" fill="color-mix(in srgb,var(--blue) 30%,transparent)" stroke="var(--blue)" stroke-width="1.5"/>
+  <text x="440" y="162" text-anchor="middle" fill="var(--blue)" font-size="8" font-weight="700">1</text>
+  <circle cx="480" cy="158" r="8" fill="color-mix(in srgb,var(--blue) 30%,transparent)" stroke="var(--blue)" stroke-width="1.5"/>
+  <text x="480" y="162" text-anchor="middle" fill="var(--blue)" font-size="8" font-weight="700">2</text>
+  <circle cx="520" cy="158" r="8" fill="color-mix(in srgb,var(--blue) 30%,transparent)" stroke="var(--blue)" stroke-width="1.5"/>
+  <text x="520" y="162" text-anchor="middle" fill="var(--blue)" font-size="8" font-weight="700">3</text>
+  <text x="560" y="161" fill="var(--text-3)" font-size="9">…</text>
+  <text x="588" y="161" fill="var(--blue)" font-size="12" font-weight="700">|</text>
+
+  <!-- Flux infinite -->
+  <text x="370" y="190" fill="var(--text-3)" font-size="9" font-weight="600">Infinite:</text>
+  <line x1="418" y1="190" x2="620" y2="190" stroke="var(--line-2)" stroke-width="1" stroke-dasharray="3,3"/>
+  <circle cx="440" cy="190" r="7" fill="color-mix(in srgb,var(--green) 30%,transparent)" stroke="var(--green)" stroke-width="1.5"/>
+  <circle cx="468" cy="190" r="7" fill="color-mix(in srgb,var(--green) 30%,transparent)" stroke="var(--green)" stroke-width="1.5"/>
+  <circle cx="496" cy="190" r="7" fill="color-mix(in srgb,var(--green) 30%,transparent)" stroke="var(--green)" stroke-width="1.5"/>
+  <text x="516" y="194" fill="var(--text-3)" font-size="12">···</text>
+  <text x="375" y="215" fill="var(--text-3)" font-size="8">Flux.interval() — never completes; use take(n) to bound</text>
+</svg>`,
+
+/* ── 12. Saga Pattern ─────────────────────────────────────── */
+sagaPattern: `<svg viewBox="0 0 680 300" xmlns="http://www.w3.org/2000/svg" font-family="Inter,sans-serif">
+  <defs>
+    <marker id="arr12" markerWidth="8" markerHeight="8" refX="6" refY="3" orient="auto">
+      <path d="M0,0 L0,6 L8,3 z" fill="var(--text-3)"/>
+    </marker>
+    <marker id="arr12r" markerWidth="8" markerHeight="8" refX="6" refY="3" orient="auto">
+      <path d="M0,0 L0,6 L8,3 z" fill="var(--rose)"/>
+    </marker>
+  </defs>
+
+  <!-- CHOREOGRAPHY (top) -->
+  <rect x="10" y="8" width="660" height="124" rx="8" fill="color-mix(in srgb,var(--green) 7%,transparent)" stroke="var(--green)" stroke-width="1"/>
+  <text x="340" y="28" text-anchor="middle" fill="var(--green)" font-size="11" font-weight="700">CHOREOGRAPHY — services react to events (no central brain)</text>
+
+  <!-- Services row -->
+  <rect x="28" y="40" width="80" height="40" rx="7" fill="color-mix(in srgb,var(--blue) 18%,transparent)" stroke="var(--blue)" stroke-width="1.5"/>
+  <text x="68" y="57" text-anchor="middle" fill="var(--blue)" font-size="9" font-weight="700">ORDER</text>
+  <text x="68" y="70" text-anchor="middle" fill="var(--text-3)" font-size="8">SVC</text>
+
+  <rect x="198" y="40" width="80" height="40" rx="7" fill="color-mix(in srgb,var(--amber) 18%,transparent)" stroke="var(--amber)" stroke-width="1.5"/>
+  <text x="238" y="57" text-anchor="middle" fill="var(--amber)" font-size="9" font-weight="700">PAYMENT</text>
+  <text x="238" y="70" text-anchor="middle" fill="var(--text-3)" font-size="8">SVC</text>
+
+  <rect x="368" y="40" width="80" height="40" rx="7" fill="color-mix(in srgb,var(--purple) 18%,transparent)" stroke="var(--purple)" stroke-width="1.5"/>
+  <text x="408" y="57" text-anchor="middle" fill="var(--purple)" font-size="9" font-weight="700">INVENTORY</text>
+  <text x="408" y="70" text-anchor="middle" fill="var(--text-3)" font-size="8">SVC</text>
+
+  <rect x="538" y="40" width="80" height="40" rx="7" fill="color-mix(in srgb,var(--teal) 18%,transparent)" stroke="var(--teal)" stroke-width="1.5"/>
+  <text x="578" y="57" text-anchor="middle" fill="var(--teal)" font-size="9" font-weight="700">NOTIFY</text>
+  <text x="578" y="70" text-anchor="middle" fill="var(--text-3)" font-size="8">SVC</text>
+
+  <!-- Event arrows (via Kafka) -->
+  <line x1="108" y1="60" x2="196" y2="60" stroke="var(--green)" stroke-width="1.5" marker-end="url(#arr12)"/>
+  <text x="152" y="54" text-anchor="middle" fill="var(--green)" font-size="8">order.created</text>
+  <line x1="278" y1="60" x2="366" y2="60" stroke="var(--green)" stroke-width="1.5" marker-end="url(#arr12)"/>
+  <text x="322" y="54" text-anchor="middle" fill="var(--green)" font-size="8">payment.done</text>
+  <line x1="448" y1="60" x2="536" y2="60" stroke="var(--green)" stroke-width="1.5" marker-end="url(#arr12)"/>
+  <text x="492" y="54" text-anchor="middle" fill="var(--green)" font-size="8">stock.reserved</text>
+
+  <!-- Compensating (red dashed) -->
+  <line x1="196" y1="78" x2="108" y2="78" stroke="var(--rose)" stroke-width="1.2" stroke-dasharray="3,3" marker-end="url(#arr12r)"/>
+  <text x="152" y="92" text-anchor="middle" fill="var(--rose)" font-size="7">payment.failed → cancel order</text>
+
+  <!-- KAFKA bus label -->
+  <rect x="28" y="104" width="620" height="18" rx="4" fill="color-mix(in srgb,var(--green) 12%,transparent)"/>
+  <text x="338" y="117" text-anchor="middle" fill="var(--text-3)" font-size="9">Kafka event bus — services publish &amp; subscribe independently</text>
+
+  <!-- ORCHESTRATION (bottom) -->
+  <rect x="10" y="144" width="660" height="148" rx="8" fill="color-mix(in srgb,var(--purple) 7%,transparent)" stroke="var(--purple)" stroke-width="1"/>
+  <text x="340" y="164" text-anchor="middle" fill="var(--purple)" font-size="11" font-weight="700">ORCHESTRATION — central coordinator directs each step</text>
+
+  <!-- Orchestrator -->
+  <rect x="280" y="174" width="120" height="48" rx="8" fill="color-mix(in srgb,var(--purple) 22%,transparent)" stroke="var(--purple)" stroke-width="2"/>
+  <text x="340" y="196" text-anchor="middle" fill="var(--purple)" font-size="10" font-weight="700">SAGA</text>
+  <text x="340" y="212" text-anchor="middle" fill="var(--purple)" font-size="10" font-weight="700">ORCHESTRATOR</text>
+
+  <!-- Services (bottom) -->
+  <rect x="28" y="208" width="80" height="34" rx="6" fill="color-mix(in srgb,var(--blue) 16%,transparent)" stroke="var(--blue)" stroke-width="1.5"/>
+  <text x="68" y="229" text-anchor="middle" fill="var(--blue)" font-size="9" font-weight="700">ORDER SVC</text>
+
+  <rect x="440" y="174" width="80" height="34" rx="6" fill="color-mix(in srgb,var(--amber) 16%,transparent)" stroke="var(--amber)" stroke-width="1.5"/>
+  <text x="480" y="195" text-anchor="middle" fill="var(--amber)" font-size="9" font-weight="700">PAYMENT SVC</text>
+
+  <rect x="560" y="208" width="80" height="34" rx="6" fill="color-mix(in srgb,var(--teal) 16%,transparent)" stroke="var(--teal)" stroke-width="1.5"/>
+  <text x="600" y="229" text-anchor="middle" fill="var(--teal)" font-size="9" font-weight="700">NOTIFY SVC</text>
+
+  <!-- Orchestrator arrows -->
+  <line x1="280" y1="205" x2="110" y2="215" stroke="var(--purple)" stroke-width="1.5" marker-end="url(#arr12)"/>
+  <text x="190" y="202" text-anchor="middle" fill="var(--text-3)" font-size="8">1. create order</text>
+  <line x1="400" y1="191" x2="440" y2="191" stroke="var(--purple)" stroke-width="1.5" marker-end="url(#arr12)"/>
+  <text x="418" y="183" text-anchor="middle" fill="var(--text-3)" font-size="8">2. charge</text>
+  <line x1="400" y1="210" x2="558" y2="220" stroke="var(--purple)" stroke-width="1.5" marker-end="url(#arr12)"/>
+  <text x="480" y="235" text-anchor="middle" fill="var(--text-3)" font-size="8">3. notify user</text>
+
+  <!-- Compensating (orchestrator) -->
+  <line x1="440" y1="202" x2="400" y2="202" stroke="var(--rose)" stroke-width="1.2" stroke-dasharray="3,3" marker-end="url(#arr12r)"/>
+  <text x="420" y="218" text-anchor="middle" fill="var(--rose)" font-size="7">fail → compensate</text>
+
+  <text x="340" y="284" text-anchor="middle" fill="var(--text-3)" font-size="8">Orchestrator tracks state machine; knows which step to compensate if any step fails</text>
+</svg>`
+
 }; // end window.DIAGRAMS
