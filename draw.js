@@ -1,7 +1,7 @@
 /* ============================================================
    draw.js — Feature-rich annotation overlay for revDoc pages.
    Self-contained: injects its own CSS, canvas, and toolbar.
-   No persistence. Drawings clear on scroll or window resize.
+   No persistence — drawings clear on window resize.
    ============================================================ */
 (function () {
   'use strict';
@@ -10,7 +10,7 @@
   var style = document.createElement('style');
   style.textContent = '\
 #draw-toggle {\
-  position: fixed; bottom: 24px; right: 24px;\
+  position: fixed; bottom: 24px; left: 24px;\
   width: 54px; height: 54px; border-radius: 50%;\
   border: none; background: #1e293b; color: #fff;\
   cursor: pointer; z-index: 92;\
@@ -29,7 +29,7 @@
   50%      { box-shadow: 0 0 0 9px rgba(99,102,241,.12), 0 4px 20px rgba(0,0,0,.4); }\
 }\
 #draw-toolbar {\
-  position: fixed; bottom: 90px; right: 14px;\
+  position: fixed; bottom: 90px; left: 14px;\
   width: 210px;\
   background: rgba(10,17,34,0.97);\
   backdrop-filter: blur(14px); -webkit-backdrop-filter: blur(14px);\
@@ -99,24 +99,41 @@
   z-index: 90; pointer-events: none; touch-action: none;\
 }\
 #draw-canvas.active { pointer-events: all; cursor: crosshair; }\
-body.drw-active { overflow: hidden; touch-action: none; }\
-.drw-hint {\
-  position: fixed; bottom: 90px; left: 50%; transform: translateX(-50%);\
-  background: rgba(10,17,34,.92); backdrop-filter: blur(8px);\
-  color: rgba(255,255,255,.75); font-size: 12px; font-family: system-ui,sans-serif;\
-  padding: 6px 16px; border-radius: 20px;\
-  z-index: 91; pointer-events: none;\
-  box-shadow: 0 4px 16px rgba(0,0,0,.3), 0 0 0 1px rgba(255,255,255,.06);\
-  transition: opacity .4s;\
+#draw-live {\
+  position: fixed; top: 0; left: 0;\
+  width: 100%; height: 100%;\
+  z-index: 91; pointer-events: none; touch-action: none;\
+  display: none;\
 }\
+body.drw-active { overflow: hidden; touch-action: none; }\
+.sidebar__home {\
+  position: absolute; top: 16px; left: 14px;\
+  width: 30px; height: 30px; border-radius: 8px;\
+  display: flex; align-items: center; justify-content: center;\
+  background: transparent; border: 1.5px solid rgba(255,255,255,.08);\
+  color: rgba(255,255,255,.45); text-decoration: none;\
+  cursor: pointer; z-index: 2;\
+  transition: background .15s, color .15s;\
+  -webkit-tap-highlight-color: transparent;\
+}\
+.sidebar__home:hover { color: #fff; background: #1c2434; }\
+.sidebar.collapsed .sidebar__home { position: static; }\
+.sidebar__title { margin-top: 28px; }\
+.sidebar.collapsed .sidebar__title { margin-top: 0; }\
 ';
   document.head.appendChild(style);
 
-  /* ── Canvas ───────────────────────────────────────────────── */
+  /* ── Main canvas (absolute, full document) ────────────────── */
   var canvas = document.createElement('canvas');
   canvas.id = 'draw-canvas';
   document.body.appendChild(canvas);
   var ctx = canvas.getContext('2d');
+
+  /* ── Live canvas (fixed, viewport only — highlighter strokes) */
+  var liveCanvas = document.createElement('canvas');
+  liveCanvas.id = 'draw-live';
+  document.body.appendChild(liveCanvas);
+  var liveCtx = liveCanvas.getContext('2d');
 
   /* ── Toolbar ──────────────────────────────────────────────── */
   var toolbar = document.createElement('div');
@@ -169,13 +186,28 @@ body.drw-active { overflow: hidden; touch-action: none; }\
   /* ── Toggle button ────────────────────────────────────────── */
   var toggleBtn = document.createElement('button');
   toggleBtn.id = 'draw-toggle';
-  toggleBtn.title = 'Toggle drawing mode (✏)';
+  toggleBtn.title = 'Toggle drawing mode';
   toggleBtn.innerHTML =
     '<svg width="21" height="21" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">' +
       '<path d="M12 20h9"/>' +
       '<path d="M16.5 3.5a2.121 2.121 0 0 1 3 3L7 19l-4 1 1-4L16.5 3.5z"/>' +
     '</svg>';
   document.body.appendChild(toggleBtn);
+
+  /* ── Home button in sidebar ───────────────────────────────── */
+  var sidebarHead = document.querySelector('.sidebar__head');
+  if (sidebarHead) {
+    var homeBtn = document.createElement('a');
+    homeBtn.href = '../index.html';
+    homeBtn.className = 'sidebar__home';
+    homeBtn.title = 'Back to home';
+    homeBtn.innerHTML =
+      '<svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">' +
+        '<path d="M3 9l9-7 9 7v11a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2z"/>' +
+        '<polyline points="9 22 9 12 15 12 15 22"/>' +
+      '</svg>';
+    sidebarHead.appendChild(homeBtn);
+  }
 
   /* ── State ────────────────────────────────────────────────── */
   var S = {
@@ -184,8 +216,9 @@ body.drw-active { overflow: hidden; touch-action: none; }\
     color: '#ffffff',
     size: 'm',
     drawing: false,
-    lx: 0, ly: 0,
-    stack: []          // ImageData undo snapshots
+    lx: 0, ly: 0,       // last doc-coords (pencil/eraser)
+    hlPts: [],           // viewport-coord points for current highlighter stroke
+    stack: []            // ImageData undo snapshots (main canvas only)
   };
 
   /* px per tool × size */
@@ -206,28 +239,69 @@ body.drw-active { overflow: hidden; touch-action: none; }\
     S.stack = [];
     syncUndoBtn();
   }
-  // Size once after layout is complete, then track window resizes
-  if (document.readyState === 'complete') { resizeCanvas(); }
-  else { window.addEventListener('load', resizeCanvas); }
-  window.addEventListener('resize', resizeCanvas);
 
-  /* ── Draw helpers ─────────────────────────────────────────── */
-  function pos(e) {
+  function resizeLive() {
+    liveCanvas.width  = window.innerWidth;
+    liveCanvas.height = window.innerHeight;
+  }
+
+  // Size once after layout, then track resizes
+  if (document.readyState === 'complete') { resizeCanvas(); resizeLive(); }
+  else { window.addEventListener('load', function () { resizeCanvas(); resizeLive(); }); }
+  window.addEventListener('resize', function () { resizeLive(); resizeCanvas(); });
+
+  /* ── Coordinate helpers ───────────────────────────────────── */
+  // Document coords — used for pencil/eraser on the absolute main canvas
+  function docPos(e) {
     var t = e.touches ? e.touches[0] : e;
     return { x: t.clientX + window.scrollX, y: t.clientY + window.scrollY };
   }
 
+  // Viewport coords — used for highlighter on the fixed live canvas
+  function vpPos(e) {
+    var t = e.touches ? e.touches[0] : e;
+    return { x: t.clientX, y: t.clientY };
+  }
+
+  /* ── Highlighter live-canvas helpers ─────────────────────── */
+  function hlRedraw() {
+    liveCtx.clearRect(0, 0, liveCanvas.width, liveCanvas.height);
+    if (S.hlPts.length < 1) return;
+    liveCtx.save();
+    liveCtx.globalAlpha   = 0.4;
+    liveCtx.globalCompositeOperation = 'source-over';
+    liveCtx.strokeStyle   = S.color;
+    liveCtx.lineWidth     = PX.highlighter[S.size];
+    liveCtx.lineCap       = 'round';
+    liveCtx.lineJoin      = 'round';
+    liveCtx.beginPath();
+    liveCtx.moveTo(S.hlPts[0].x, S.hlPts[0].y);
+    for (var i = 1; i < S.hlPts.length; i++) {
+      liveCtx.lineTo(S.hlPts[i].x, S.hlPts[i].y);
+    }
+    liveCtx.stroke();
+    liveCtx.restore();
+  }
+
+  function hlCommit() {
+    // Bake the live canvas into the main canvas at the correct scroll offset
+    ctx.save();
+    ctx.globalAlpha = 0.4;
+    ctx.globalCompositeOperation = 'source-over';
+    ctx.drawImage(liveCanvas, window.scrollX, window.scrollY);
+    ctx.restore();
+    liveCtx.clearRect(0, 0, liveCanvas.width, liveCanvas.height);
+    liveCanvas.style.display = 'none';
+    S.hlPts = [];
+  }
+
+  /* ── Draw helpers ─────────────────────────────────────────── */
   function applyStyle() {
     var lw = PX[S.tool][S.size];
     ctx.lineWidth  = lw;
     ctx.lineCap    = 'round';
     ctx.lineJoin   = 'round';
-    if (S.tool === 'highlighter') {
-      ctx.globalCompositeOperation = 'source-over';
-      ctx.globalAlpha  = 0.38;
-      ctx.strokeStyle  = S.color;
-      ctx.fillStyle    = S.color;
-    } else if (S.tool === 'eraser') {
+    if (S.tool === 'eraser') {
       ctx.globalCompositeOperation = 'destination-out';
       ctx.globalAlpha  = 1;
       ctx.strokeStyle  = 'rgba(0,0,0,1)';
@@ -250,8 +324,18 @@ body.drw-active { overflow: hidden; touch-action: none; }\
     if (!S.active) return;
     if (e.touches && e.touches.length > 1) return;
     e.preventDefault();
-    snapshot();                      // capture state before stroke
-    var p = pos(e);
+
+    if (S.tool === 'highlighter') {
+      snapshot();
+      S.drawing = true;
+      S.hlPts   = [vpPos(e)];
+      liveCanvas.style.display = 'block';
+      hlRedraw();
+      return;
+    }
+
+    snapshot();
+    var p = docPos(e);
     S.drawing = true;
     S.lx = p.x; S.ly = p.y;
     applyStyle();
@@ -260,9 +344,8 @@ body.drw-active { overflow: hidden; touch-action: none; }\
       ctx.clearRect(p.x - hw, p.y - hw, hw * 2, hw * 2);
     } else {
       ctx.beginPath();
-      ctx.arc(p.x, p.y, PX[S.tool][S.size] / 2, 0, Math.PI * 2);
+      ctx.arc(p.x, p.y, PX.pencil[S.size] / 2, 0, Math.PI * 2);
       ctx.fill();
-      ctx.globalAlpha = S.tool === 'highlighter' ? 0.38 : 1;
     }
     ctx.beginPath();
     ctx.moveTo(p.x, p.y);
@@ -272,7 +355,14 @@ body.drw-active { overflow: hidden; touch-action: none; }\
     if (!S.drawing) return;
     if (e.touches && e.touches.length > 1) return;
     e.preventDefault();
-    var p = pos(e);
+
+    if (S.tool === 'highlighter') {
+      S.hlPts.push(vpPos(e));
+      hlRedraw();
+      return;
+    }
+
+    var p = docPos(e);
     applyStyle();
     if (S.tool === 'eraser') {
       var hw = PX.eraser[S.size] / 2;
@@ -289,9 +379,13 @@ body.drw-active { overflow: hidden; touch-action: none; }\
   function onUp() {
     if (!S.drawing) return;
     S.drawing = false;
-    ctx.beginPath();
-    ctx.globalAlpha = 1;
-    ctx.globalCompositeOperation = 'source-over';
+    if (S.tool === 'highlighter') {
+      hlCommit();
+    } else {
+      ctx.beginPath();
+      ctx.globalAlpha = 1;
+      ctx.globalCompositeOperation = 'source-over';
+    }
   }
 
   /* ── Canvas events ────────────────────────────────────────── */
@@ -313,17 +407,19 @@ body.drw-active { overflow: hidden; touch-action: none; }\
 
   function clearAll() {
     ctx.clearRect(0, 0, canvas.width, canvas.height);
+    liveCtx.clearRect(0, 0, liveCanvas.width, liveCanvas.height);
     S.stack = [];
     syncUndoBtn();
   }
 
   function syncUndoBtn() {
-    document.getElementById('drw-undo').disabled = S.stack.length === 0;
+    var btn = document.getElementById('drw-undo');
+    if (btn) btn.disabled = S.stack.length === 0;
   }
 
   /* ── Mode toggle ──────────────────────────────────────────── */
   function enter() {
-    resizeCanvas();             // measure full document height before locking scroll
+    resizeCanvas();
     S.active = true;
     canvas.classList.add('active');
     toolbar.classList.add('visible');
@@ -334,6 +430,7 @@ body.drw-active { overflow: hidden; touch-action: none; }\
   function exit() {
     S.active  = false;
     S.drawing = false;
+    hlCommit(); // commit any in-progress highlighter stroke
     canvas.classList.remove('active');
     toolbar.classList.remove('visible');
     toggleBtn.classList.remove('active');
@@ -345,9 +442,9 @@ body.drw-active { overflow: hidden; touch-action: none; }\
   });
 
   /* ── Toolbar wiring ───────────────────────────────────────── */
-  var toolBtns  = toolbar.querySelectorAll('.drw-tool');
-  var swatches  = toolbar.querySelectorAll('.drw-swatch');
-  var sizeBtns  = toolbar.querySelectorAll('.drw-sz');
+  var toolBtns = toolbar.querySelectorAll('.drw-tool');
+  var swatches = toolbar.querySelectorAll('.drw-swatch');
+  var sizeBtns = toolbar.querySelectorAll('.drw-sz');
 
   toolBtns.forEach(function (btn) {
     btn.addEventListener('click', function () {
