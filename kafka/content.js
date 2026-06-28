@@ -8,9 +8,9 @@ window.CONTENT = {
   hero: {
     eyebrow: 'The Complete Guide',
     title: 'Apache Kafka',
-    sub: 'From the append-only log up to Streams, Connect, multi-cluster DR and managed cloud. Fifteen phases covering every layer of Kafka — each concept explained with diagrams, real Java / Spring code, CLI snippets, and the production gotchas that actually bite. Built for deep study and fast revision.',
+    sub: 'From the append-only log up to Streams, Connect, multi-cluster DR and managed cloud. Sixteen phases covering every layer of Kafka — each concept explained with diagrams, real Java / Spring code, CLI snippets, and the production gotchas that actually bite. Built for deep study and fast revision.',
     stats: [
-      { num: '15', label: 'Phases' },
+      { num: '16', label: 'Phases' },
       { num: '70+', label: 'Concepts' },
       { num: '60+', label: 'Code samples' },
       { num: 'KRaft', label: 'Modern Kafka' },
@@ -968,7 +968,123 @@ kafka-configs.sh --alter --entity-type topics --entity-name orders \\
           `<strong>Phased cutover</strong> — run hybrid (on-prem + cloud) during transition; migrate consumers, then producers.`,
           `<strong>Cost optimisation</strong> — right-size tiers, lean on tiered storage, watch egress.`,
         ] },
-        { t: 'callout', kind: 'key', html: `<strong>You made it — all 15 phases.</strong> From the append-only log to managed cloud Kafka. Revisit the phases you're shaky on; the diagrams and code are here to drill the model in. Next: build the hands-on projects (basic producer/consumer → DLQ → event sourcing → streams → multi-service saga).` },
+        { t: 'callout', kind: 'key', html: `<strong>Phases 0–15 complete.</strong> From the append-only log to managed cloud Kafka. Revisit the phases you're shaky on; the diagrams and code are here to drill the model in. Next: Phase 16 — interview Q&A to consolidate everything.` },
+      ],
+    },
+
+    /* ========================================================
+       PHASE 16 — INTERVIEW Q&A
+       ======================================================== */
+    {
+      id: 'phase-16', num: '16', accent: 'purple', part: 'Interview Prep',
+      eyebrow: 'Phase 16 · Most Asked',
+      title: 'Interview Q & A',
+      intro: 'The 12 most common Kafka interview questions — each with a complete, production-grade answer. Scan the phases above for depth; come here to consolidate and rehearse.',
+      blocks: [
+        { t: 'sub', text: 'Architecture & Core Concepts' },
+        { t: 'cards', cols: 2, items: [
+          {
+            title: 'Q: What is Kafka and what problems does it solve?',
+            body: `Kafka is a distributed, persistent, append-only log that acts as a pub-sub messaging backbone.<br><br>
+<strong>Problems it solves:</strong><br>
+• <strong>Decoupling</strong> — producers and consumers are fully independent; add a consumer without touching the producer<br>
+• <strong>High-throughput ingestion</strong> — sequential disk writes, batching, zero-copy push millions of events/sec<br>
+• <strong>Replayability</strong> — consumers can reset to offset 0 and replay all history<br>
+• <strong>Real-time pipelines</strong> — stream processing, ETL, CDC, event sourcing all on one platform<br><br>
+<em>One-line summary:</em> Kafka replaces point-to-point REST call chains and fragile queues with a durable, replayable event bus.`
+          },
+          {
+            title: 'Q: Explain Kafka\'s architecture — brokers, topics, partitions, replicas.',
+            body: `<strong>Broker</strong>: a Kafka server node that stores data and serves clients. A cluster = multiple brokers.<br><br>
+<strong>Topic</strong>: a named, logical stream (e.g. <code>user-events</code>). Topics are divided into partitions.<br><br>
+<strong>Partition</strong>: an ordered, immutable log of messages. The unit of parallelism — one consumer per partition per group. Messages within a partition are strictly ordered by offset.<br><br>
+<strong>Replica</strong>: a copy of a partition on a different broker. One replica is the <em>Leader</em> (handles reads/writes); others are <em>Followers</em> (ISR — In-Sync Replicas). If the Leader dies, a Follower is elected. RF=3 survives 2 broker failures.`
+          },
+          {
+            title: 'Q: What is the difference between a Topic and a Partition?',
+            body: `<strong>Topic</strong>: a logical category / feed (like a database table name). You produce and consume from a topic.<br><br>
+<strong>Partition</strong>: the physical shard that makes up a topic. Messages in a topic are <em>spread across</em> its partitions by key hash (or round-robin). Each partition is an independent ordered log.<br><br>
+Key rules:<br>
+• Ordering is guaranteed <em>within</em> a partition, NOT across partitions<br>
+• Parallelism is bounded by partition count — 3 partitions → max 3 consumers in a group<br>
+• You can increase partitions later, but can't decrease them (breaks key ordering)`
+          },
+          {
+            title: 'Q: What is a Consumer Group and how does partition assignment work?',
+            body: `A Consumer Group is a set of consumers that collaboratively read a topic.<br><br>
+<strong>Assignment rule:</strong> each partition is owned by exactly ONE consumer in the group at a time — no duplicate processing. Multiple groups can each read the same topic independently (fan-out).<br><br>
+<strong>Scaling rule:</strong> if consumers > partitions, the extra consumers sit idle. To add parallelism, increase partition count first.<br><br>
+<strong>On consumer failure:</strong> the group coordinator triggers a rebalance, reassigning that consumer's partitions to surviving members. During rebalance, all consumption is paused — minimize rebalance time with incremental cooperative rebalancing.`
+          },
+        ] },
+
+        { t: 'sub', text: 'Reliability & Delivery' },
+        { t: 'cards', cols: 2, items: [
+          {
+            title: 'Q: What are Kafka\'s delivery guarantees and how do you achieve each?',
+            body: `<strong>At-most-once</strong>: commit offset before processing. Message may be lost but never duplicated. Use for metrics where occasional loss is tolerable.<br><br>
+<strong>At-least-once</strong>: process then commit. Message never lost but may be reprocessed. Requires idempotent consumers. Default for most production use cases.<br><br>
+<strong>Exactly-once</strong>: idempotent producer (<code>enable.idempotence=true</code>) + transactional API (<code>transactional.id</code>). Producer deduplicates retries; transaction commits offset + output atomically. Highest overhead — use only when duplication is genuinely intolerable (e.g., financial ledgers).`
+          },
+          {
+            title: 'Q: What is a Consumer Offset and what is Consumer Lag?',
+            body: `<strong>Offset</strong>: a sequential integer ID for each message within a partition. The consumer tracks which offset it has processed by committing to the internal <code>__consumer_offsets</code> topic.<br><br>
+<strong>Consumer Lag</strong>: <em>latest offset</em> − <em>committed offset</em>. A growing lag means consumers are falling behind producers.<br><br>
+<strong>Causes of lag:</strong> slow processing, rebalancing pauses, broker or network issues.<br><br>
+<strong>Fixes:</strong> add more partitions + consumers, optimise processing (batch, async), tune <code>fetch.min.bytes</code>/<code>fetch.max.wait.ms</code>, or scale brokers. Monitor with Burrow or built-in JMX metrics.`
+          },
+          {
+            title: 'Q: What is replication in Kafka? What is ISR?',
+            body: `Each partition is replicated across <code>replication.factor</code> brokers. The <strong>Leader</strong> handles all reads and writes. <strong>Followers</strong> pull from the Leader and maintain their own copy.<br><br>
+<strong>ISR (In-Sync Replicas)</strong>: the subset of followers that are caught up (within <code>replica.lag.time.max.ms</code>). A follower that falls behind is removed from the ISR.<br><br>
+<strong>acks=all</strong> + <code>min.insync.replicas=2</code>: a produce is only acknowledged when at least 2 ISR replicas have written it. Guarantees no data loss even if the leader immediately crashes. RF=3, min.ISR=2 is the standard durable production configuration.`
+          },
+          {
+            title: 'Q: Why does Kafka use a pull model instead of push?',
+            body: `Kafka consumers <strong>pull</strong> (poll) messages at their own pace. Brokers don't push to consumers.<br><br>
+<strong>Advantages of pull:</strong><br>
+• Consumer controls throughput — no risk of being overwhelmed (natural backpressure)<br>
+• Better for batch processing — consumer can pull a large batch when ready<br>
+• Simpler broker design — no need to track each consumer's capacity<br><br>
+<strong>Trade-off:</strong> consumers must poll even when the topic is empty (<code>fetch.max.wait.ms</code> avoids tight loops). Push would have lower latency for sparse events — but Kafka optimises for high-throughput bulk workloads, not low-latency single-message delivery.`
+          },
+        ] },
+
+        { t: 'sub', text: 'Scaling, Ecosystem & Production' },
+        { t: 'cards', cols: 2, items: [
+          {
+            title: 'Q: How do you scale Kafka horizontally?',
+            body: `<strong>Brokers</strong>: add more broker nodes. Kafka auto-distributes new partition replicas across them.<br><br>
+<strong>Partitions</strong>: increase partition count to raise max consumer parallelism (max consumers per group = partition count). You can only increase — never decrease — partitions after creation.<br><br>
+<strong>Consumers</strong>: add consumer instances up to the partition count.<br><br>
+<strong>Producer throughput</strong>: tune batch size, linger.ms, compression (snappy/lz4 typically best latency/ratio trade-off).<br><br>
+<strong>Storage</strong>: use tiered storage (Confluent/MSK) to offload old segments to object storage, keeping broker disk small regardless of retention period.`
+          },
+          {
+            title: 'Q: What is Kafka Connect and when do you use it?',
+            body: `Kafka Connect is a scalable framework for integrating Kafka with external systems without writing custom producer/consumer code.<br><br>
+<strong>Source connector</strong>: pulls data INTO Kafka (e.g. Debezium CDC → PostgreSQL changes become events).<br><br>
+<strong>Sink connector</strong>: pushes data OUT of Kafka (e.g. Kafka → S3, Elasticsearch, Snowflake).<br><br>
+<strong>When to use:</strong> any ETL/ELT pipeline between a system and Kafka. Prefer Connect over a custom microservice because it handles offset management, error handling, schema evolution, and horizontal scaling (distributed mode) out of the box.`
+          },
+          {
+            title: 'Q: What is Kafka Streams and how does it differ from Flink/Spark?',
+            body: `<strong>Kafka Streams</strong>: a Java library (not a separate cluster) for stateful stream processing directly on Kafka topics. It runs inside your application — no separate infrastructure.<br><br>
+<strong>Operations:</strong> filter, map, join (stream-stream, stream-table), aggregate, windowing, KTable (changelog-backed view), exactly-once semantics.<br><br>
+<strong>vs. Flink/Spark:</strong> Streams is simpler to operate (no cluster, just a library), but limited to Kafka sources/sinks and scales to tens-of-thousands of events/sec. Flink/Spark handle more complex topologies, arbitrary sources, and higher throughput — at the cost of managing a separate cluster.`
+          },
+          {
+            title: 'Q: What causes "Rebalance" and how do you minimise its impact?',
+            body: `A rebalance is triggered when a consumer joins/leaves a group, or fails to send a heartbeat within <code>session.timeout.ms</code>.<br><br>
+<strong>Impact:</strong> all partition consumption pauses until assignments are redistributed. At scale, a 30-second rebalance on a 200-consumer group causes significant lag.<br><br>
+<strong>Mitigations:</strong><br>
+• Use <strong>incremental cooperative rebalancing</strong> (Kafka 2.4+) — only revoked partitions pause, not all<br>
+• Tune <code>max.poll.interval.ms</code> to match your slowest processing time<br>
+• Assign static membership (<code>group.instance.id</code>) to avoid rebalances on planned rolling restarts`
+          },
+        ] },
+
+        { t: 'callout', kind: 'key', html: `<strong>You've covered all 16 phases.</strong> From the append-only log to exactly-once semantics, Streams, Connect, and cloud deployment — plus the interview questions that consolidate it all.` },
       ],
     },
   ],

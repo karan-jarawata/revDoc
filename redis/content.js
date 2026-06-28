@@ -8,9 +8,9 @@ window.CONTENT = {
   hero: {
     eyebrow: 'The Complete Guide',
     title: 'Redis',
-    sub: 'From the single-threaded event loop and the five core data types up to caching patterns, persistence, replication, Sentinel, Cluster, and Streams. Seven phases covering every layer of Redis — each concept explained with diagrams, real CLI / Java / Spring code, and the interview-grade gotchas (the three cache killers, eviction policies, RDB vs AOF). Built for deep study and fast revision.',
+    sub: 'From the single-threaded event loop and the five core data types up to caching patterns, persistence, replication, Sentinel, Cluster, and Streams. Eight phases covering every layer of Redis — each concept explained with diagrams, real CLI / Java / Spring code, and the interview-grade gotchas (the three cache killers, eviction policies, RDB vs AOF). Built for deep study and fast revision.',
     stats: [
-      { num: '7', label: 'Phases' },
+      { num: '8', label: 'Phases' },
       { num: '5+', label: 'Data types' },
       { num: '50+', label: 'Code samples' },
       { num: '16', label: 'Diagrams' },
@@ -571,7 +571,142 @@ JSON.GET user:1 $.name
 
 FT.CREATE idx ON JSON SCHEMA $.name AS name TEXT
 FT.SEARCH idx "john"` },
-        { t: 'callout', kind: 'key', html: `<strong>You made it — all 7 phases.</strong> From "why Redis" to Streams and distributed locks. The interview essentials: the three cache killers, eviction policies (LRU vs LFU), RDB vs AOF, replication vs cluster, and why single-threaded means atomic. Revisit the phases you're shaky on — the diagrams and code are here to drill them in.` },
+        { t: 'callout', kind: 'key', html: `<strong>Phases 0–6 complete.</strong> From "why Redis" to Streams and distributed locks. Head to Phase 7 for the interview Q&A that consolidates everything.` },
+      ],
+    },
+
+    /* ========================================================
+       PHASE 7 — INTERVIEW Q&A
+       ======================================================== */
+    {
+      id: 'phase-7', num: '07', accent: 'purple', part: 'Interview Prep',
+      eyebrow: 'Phase 7 · Most Asked',
+      title: 'Interview Q & A',
+      intro: 'The 14 most common Redis interview questions — each with a complete, production-grade answer. Scan the phases above for depth; come here to consolidate and rehearse.',
+      blocks: [
+        { t: 'sub', text: 'Core Concepts & Data Structures' },
+        { t: 'cards', cols: 2, items: [
+          {
+            title: 'Q: What is Redis and what are its main use cases?',
+            body: `Redis is an <strong>in-memory data structure store</strong> — it holds everything in RAM for microsecond latency, with optional persistence to disk.<br><br>
+<strong>Primary use cases:</strong><br>
+• <strong>Caching</strong>: sub-millisecond reads for hot data (user profiles, product pages)<br>
+• <strong>Session storage</strong>: JWT / auth tokens with automatic TTL expiry<br>
+• <strong>Rate limiting</strong>: atomic INCR + EXPIRE for token-bucket counters<br>
+• <strong>Leaderboards</strong>: Sorted Sets rank players by score in O(log N)<br>
+• <strong>Pub/Sub</strong>: real-time notifications between services<br>
+• <strong>Task queues</strong>: List LPUSH/BRPOP for background job processing<br>
+• <strong>Distributed locks</strong>: SET NX EX for cross-process mutual exclusion`
+          },
+          {
+            title: 'Q: What are the Redis data structures and when do you use each?',
+            body: `<strong>String</strong>: any value ≤512MB. Counters, cached JSON, session tokens. INCR is atomic.<br><br>
+<strong>Hash</strong>: field→value map. Ideal for objects (user profile) — cheaper than JSON string per field.<br><br>
+<strong>List</strong>: ordered, allows duplicates. LPUSH/BRPOP = message queue / task queue. LRANGE = timeline feed.<br><br>
+<strong>Set</strong>: unique, unordered. SADD/SINTER/SUNION — tags, followers, deduplication.<br><br>
+<strong>Sorted Set</strong>: unique members + float score. ZADD/ZRANGE — leaderboards, priority queues, TTL-indexed caches.<br><br>
+<strong>Stream</strong>: append-only log with consumer groups. Like Kafka inside Redis — reliable event queues with history.<br><br>
+<strong>HyperLogLog</strong>: probabilistic unique-count (~0.81% error). PFADD/PFCOUNT — unique visitor counts at 12KB regardless of cardinality.`
+          },
+          {
+            title: 'Q: Why is Redis single-threaded? Does that make it slow?',
+            body: `Redis processes commands on a <strong>single main thread</strong>. This is a deliberate design choice, not a limitation.<br><br>
+<strong>Why it works:</strong> all data is in RAM, so operations are nanoseconds to microseconds. The CPU is never the bottleneck — I/O and network are. The single thread eliminates all lock contention and race conditions, making commands inherently atomic.<br><br>
+<strong>Not truly single-threaded today:</strong> Redis 6+ uses I/O threads for network reads/writes (multi-threaded I/O), while keeping command execution single-threaded. Handles 1–2M simple ops/sec on a single instance. For higher throughput, use Redis Cluster to shard across nodes.`
+          },
+          {
+            title: 'Q: What is TTL and how does Redis expire keys?',
+            body: `<strong>TTL (Time To Live)</strong>: an expiration countdown on a key. After it reaches zero, the key is automatically deleted.<br><br>
+<strong>How expiry works (two mechanisms):</strong><br>
+• <strong>Lazy expiry</strong>: key is checked when accessed — if expired, deleted then. Low overhead but stale keys linger in RAM until touched.<br>
+• <strong>Active expiry</strong>: Redis periodically samples ~20 random expiring keys per cycle and deletes expired ones. Continues cycling if >25% were expired.<br><br>
+<strong>Key commands:</strong> <code>EXPIRE key seconds</code>, <code>PEXPIRE key ms</code>, <code>TTL key</code> (returns -1 if no TTL, -2 if key gone), <code>PERSIST key</code> removes the TTL.`
+          },
+        ] },
+
+        { t: 'sub', text: 'Persistence, Replication & High Availability' },
+        { t: 'cards', cols: 2, items: [
+          {
+            title: 'Q: What is the difference between RDB and AOF persistence?',
+            body: `<strong>RDB (snapshot)</strong>: writes a binary point-in-time snapshot at configured intervals (e.g. every 15 min if 1+ key changed). Fast to restore, compact file. Risk: data written since the last snapshot is lost on crash.<br><br>
+<strong>AOF (Append-Only File)</strong>: logs every write command. On restart, replays the log to rebuild state. Much more durable — with <code>appendfsync everysec</code> you lose at most 1 second of data. Larger files, slower restores.<br><br>
+<strong>Best practice:</strong> enable <em>both</em>. On restart Redis prefers AOF (more up-to-date). Run <code>BGREWRITEAOF</code> periodically to compact the AOF. RDB gives you a fast backup; AOF gives you durability.`
+          },
+          {
+            title: 'Q: What is Redis replication and what is Sentinel for?',
+            body: `<strong>Replication</strong>: one Master handles all writes; one or more Replicas receive a continuous stream of changes and serve reads. Replicas are read-only. If the master fails, you must manually promote a replica — there is no automatic failover in plain replication.<br><br>
+<strong>Redis Sentinel</strong>: adds automatic high-availability on top of replication. A quorum of Sentinel processes (typically 3) monitors the master. If the master is unreachable by a majority of Sentinels, they elect a new master, reconfigure replicas to follow it, and notify clients via the Sentinel API. Sentinel provides HA without sharding.`
+          },
+          {
+            title: 'Q: What is Redis Cluster and how does data sharding work?',
+            body: `Redis Cluster partitions data across multiple master nodes for horizontal scaling beyond a single machine's RAM.<br><br>
+<strong>Hash slots:</strong> Redis divides the keyspace into 16,384 hash slots. Each key maps to a slot via <code>CRC16(key) % 16384</code>. Each master owns a contiguous range of slots. Add a node → move slots to it; remove a node → redistribute its slots.<br><br>
+<strong>Fault tolerance:</strong> each master has ≥1 replica. If a master fails, its replica is automatically promoted.<br><br>
+<strong>Client requirement:</strong> clients must be cluster-aware (follow MOVED/ASK redirections) or use a smart client library that handles slot routing transparently.`
+          },
+          {
+            title: 'Q: What are Redis eviction policies and when do you use each?',
+            body: `When <code>maxmemory</code> is reached and a new write comes in, Redis applies the eviction policy:<br><br>
+• <code>noeviction</code>: return error — write fails. Safe, explicit. Use when you must never lose data.<br>
+• <code>allkeys-lru</code>: evict any key, least-recently-used first. Best for general caches where all keys may be hot.<br>
+• <code>volatile-lru</code>: evict only keys with TTL set, LRU order. Use when some keys must never expire (permanent config) while others are cache candidates.<br>
+• <code>allkeys-lfu</code>: evict least-frequently-used. Better than LRU for skewed access patterns (a few keys accessed millions of times).<br>
+• <code>allkeys-random</code>: random eviction. Use only if all keys are equally important / unimportant.`
+          },
+        ] },
+
+        { t: 'sub', text: 'Patterns, Performance & Comparisons' },
+        { t: 'cards', cols: 2, items: [
+          {
+            title: 'Q: What are the three cache failure patterns?',
+            body: `<strong>Cache Miss (cold start)</strong>: key not in cache → DB hit. Expected; the cache warms up over time.<br><br>
+<strong>Cache Stampede (thundering herd)</strong>: a popular key expires → hundreds of requests simultaneously hit the DB. Fix: mutex lock on first miss, probabilistic early re-computation, or sliding TTL.<br><br>
+<strong>Cache Penetration</strong>: requests for keys that will NEVER exist in DB (e.g., invalid IDs) bypass cache every time. Fix: cache negative results (<code>SET key "null" EX 60</code>) or use a Bloom filter at the gateway to reject known-nonexistent keys.<br><br>
+<strong>Cache Avalanche</strong>: many keys expire simultaneously (e.g. after a cache flush) → DB overwhelmed. Fix: jitter the TTLs (<code>base_ttl + random(0, 60)</code>) so expiries are spread out.`
+          },
+          {
+            title: 'Q: What are Redis Transactions (MULTI/EXEC)?',
+            body: `Redis transactions queue commands with <code>MULTI</code> and execute them atomically with <code>EXEC</code>. No other client's commands interleave during execution.<br><br>
+<strong>Important nuance:</strong> Redis transactions are <em>not</em> rollback-capable. If a queued command has a runtime error (e.g. wrong type), the other commands still execute. Only syntax errors (checked at queue time) abort the whole transaction.<br><br>
+<strong>WATCH for optimistic locking:</strong> <code>WATCH key</code> before <code>MULTI</code> — if the watched key changes before <code>EXEC</code>, the transaction is aborted (returns nil). Your code retries. This is Redis's CAS-style pattern.`
+          },
+          {
+            title: 'Q: What is Redis Pipelining and when do you use it?',
+            body: `Normally, each command incurs a full network round-trip (send → server processes → response). Pipelining sends multiple commands in one TCP write and reads all responses in one batch — dramatically cutting latency for bulk operations.<br><br>
+<strong>Example:</strong> setting 1000 keys with individual calls = 1000 round-trips (~200ms on LAN). With a pipeline = 1 round-trip (~0.2ms).<br><br>
+<strong>Use when:</strong> bulk inserts on startup, batch cache warming, periodic metric flushes. Most Redis client libraries support it natively. Note: pipelining is not atomic — use MULTI/EXEC if you need atomicity.`
+          },
+          {
+            title: 'Q: What is the difference between Redis and Memcached?',
+            body: `<strong>Memcached</strong>: pure, dead-simple key-value cache. Strings only. No persistence, no replication, no pub/sub. Extremely fast for raw cache hits, multi-threaded.<br><br>
+<strong>Redis</strong>: rich data structures (5+ types), optional persistence (RDB/AOF), replication, Sentinel/Cluster HA, pub/sub, Streams, Lua scripting, transactions.<br><br>
+<strong>Choose Memcached when:</strong> you only need simple string caching, need multi-threaded scaling on a single node, and want the absolute simplest ops story.<br><br>
+<strong>Choose Redis when:</strong> you need any advanced feature — sorted sets for leaderboards, persistence so the cache survives a restart, Streams for reliable queues, or Cluster for sharding.`
+          },
+          {
+            title: 'Q: What causes Redis memory issues and how do you fix them?',
+            body: `<strong>Common causes:</strong><br>
+• Keys without TTL accumulating indefinitely<br>
+• Storing large blobs (images, full HTML) — should be in object storage<br>
+• Wrong data structure (storing objects as JSON strings instead of Hashes)<br>
+• Memory fragmentation over time<br><br>
+<strong>Fixes:</strong><br>
+• Always set TTLs on cache keys<br>
+• Check <code>INFO memory</code>, use <code>MEMORY USAGE key</code> to find big keys<br>
+• Run <code>MEMORY DOCTOR</code> for recommendations<br>
+• Use <code>redis-cli --bigkeys</code> to find top memory consumers<br>
+• Set <code>maxmemory</code> + an eviction policy so Redis self-manages under pressure`
+          },
+          {
+            title: 'Q: What are Redis Streams and how do they compare to Pub/Sub?',
+            body: `<strong>Pub/Sub</strong>: fire-and-forget. Subscribers only receive messages published <em>after</em> they subscribe — no history, no persistence. If no subscriber is online, the message is gone.<br><br>
+<strong>Streams</strong>: an append-only, persistent log with consumer groups (like Kafka inside Redis). Messages have unique auto-generated IDs (timestamp-sequence). Consumers acknowledge messages (<code>XACK</code>); unacknowledged messages are redelivered. Multiple consumer groups read independently.<br><br>
+<strong>Use Pub/Sub for:</strong> ephemeral real-time notifications (live chat typing indicators, price ticks).<br><br>
+<strong>Use Streams for:</strong> reliable async task queues, event sourcing, any use case where you can't afford to lose a message.`
+          },
+        ] },
+
+        { t: 'callout', kind: 'key', html: `<strong>All 8 phases complete.</strong> From in-memory data structures to distributed Cluster, persistence, and the interview Q&A that ties it all together. The three cache killers, eviction policies, RDB vs AOF, replication vs cluster — you've got them all.` },
       ],
     },
   ],

@@ -94,7 +94,7 @@
   width: 100%; height: 100%;\
   pointer-events: none; touch-action: none;\
 }\
-#draw-canvas { z-index: 90; }\
+#draw-canvas { z-index: 90; will-change: transform; }\
 #draw-canvas.active { pointer-events: all; cursor: crosshair; }\
 #draw-live { z-index: 91; display: none; }\
 body.drw-active { overflow: hidden; touch-action: none; }\
@@ -165,8 +165,8 @@ body.drw-active { overflow: hidden; touch-action: none; }\
     '<div class="drw-sep"></div>' +
     '<div class="drw-label">Size</div>' +
     '<div class="drw-sizes">' +
-      '<button class="drw-sz" data-sz="s">S</button>' +
-      '<button class="drw-sz on" data-sz="m">M</button>' +
+      '<button class="drw-sz on" data-sz="s">S</button>' +
+      '<button class="drw-sz" data-sz="m">M</button>' +
       '<button class="drw-sz" data-sz="l">L</button>' +
     '</div>' +
     '<div class="drw-sep"></div>' +
@@ -207,7 +207,7 @@ body.drw-active { overflow: hidden; touch-action: none; }\
 
   /* ── State ────────────────────────────────────────────────── */
   var S = {
-    active: false, tool: 'pencil', color: '#ffffff', size: 'm',
+    active: false, tool: 'pencil', color: '#ffffff', size: 's',
     drawing: false, lx: 0, ly: 0,
     hlPts: []   // viewport-coord points for live highlighter preview
   };
@@ -275,17 +275,42 @@ body.drw-active { overflow: hidden; touch-action: none; }\
   }
 
   /* ── Full redraw from stroke store ───────────────────────── */
+  /* Track scroll position at the time of the last full pixel repaint.
+     The CSS transform on the canvas compensates the delta between that
+     position and the current scroll, keeping drawings glued to the page
+     without waiting for a JS repaint cycle. */
+  var _redrawSX = 0, _redrawSY = 0;
+
   function redraw() {
+    canvas.style.transform = 'none';   // clear any compensation offset
+    _redrawSX = window.scrollX;
+    _redrawSY = window.scrollY;
     ctx.setTransform(1, 0, 0, 1, 0, 0);
     ctx.clearRect(0, 0, canvas.width, canvas.height);
     if (!strokes.length) return;
-    ctx.setTransform(1, 0, 0, 1, -window.scrollX, -window.scrollY);
+    ctx.setTransform(1, 0, 0, 1, -_redrawSX, -_redrawSY);
     for (var i = 0; i < strokes.length; i++) renderStroke(ctx, strokes[i]);
     ctx.setTransform(1, 0, 0, 1, 0, 0);
   }
 
-  /* Redraw on scroll so strokes follow page content */
-  window.addEventListener('scroll', redraw, { passive: true });
+  /* Two-stage scroll handler:
+     1. Immediately shift the canvas element via CSS translate — the compositor
+        picks this up in the same frame the scroll happened, so drawings never
+        appear to float regardless of scroll speed.
+     2. Schedule a rAF to do the accurate pixel repaint and clear the offset. */
+  var _rafPending = false;
+  function onScrollRedraw() {
+    var dx = window.scrollX - _redrawSX;
+    var dy = window.scrollY - _redrawSY;
+    canvas.style.transform = 'translate(' + (-dx) + 'px,' + (-dy) + 'px)';
+    if (_rafPending) return;
+    _rafPending = true;
+    requestAnimationFrame(function () {
+      _rafPending = false;
+      redraw();
+    });
+  }
+  window.addEventListener('scroll', onScrollRedraw, { passive: true });
 
   /* ── Highlighter live preview ─────────────────────────────── */
   function hlRedraw() {
