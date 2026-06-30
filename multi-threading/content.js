@@ -61,6 +61,7 @@ window.CONTENT = {
         { t: 'analogy', html: `<b>Real world:</b> A restaurant kitchen is the heap (shared, coordination needed). Each chef's mental task list is their stack (private, no coordination needed). Chefs fight over the same chopping board (shared data) — they never fight over their own memories.` },
 
         { t: 'sub', text: 'Creating a thread — three ways' },
+        { t: 'prose', html: `Java gives you three ways to spin up a thread. They all eventually call <code>start()</code>, but they differ in flexibility and how production-ready they are.` },
         { t: 'code', title: 'ThreadCreation.java', code:
 `// 1. Implement Runnable (preferred — composition over inheritance)
 //    Why: keeps your class free to extend something else
@@ -84,6 +85,7 @@ pool.submit(task);` },
         { t: 'callout', kind: 'tip', html: `<strong>Where to use each:</strong> <code>Runnable</code> lambda for quick one-off tasks. Extend <code>Thread</code> only in toy examples. Use Executors (Level 8) for everything production.` },
 
         { t: 'sub', text: 'Daemon vs. Non-Daemon threads' },
+        { t: 'prose', html: `By default every thread you create is <strong>non-daemon</strong> — the JVM will not exit while one is still running. A <strong>daemon</strong> thread is marked as a background servant: the JVM happily exits once only daemon threads remain, even if they're mid-loop. Use daemon threads for housekeeping work that should never block shutdown.` },
         { t: 'code', title: 'DaemonDemo.java', code:
 `Thread logger = new Thread(() -> {
     while (true) {
@@ -538,6 +540,7 @@ private static final ThreadLocal<SimpleDateFormat> FMT =
           ] },
 
         { t: 'sub', text: 'ReentrantLock — the smart lock' },
+        { t: 'prose', html: `<code>ReentrantLock</code> (from <code>java.util.concurrent.locks</code>) does everything <code>synchronized</code> does, plus the things it can't: timeouts, interruptibility, and fairness. You call <code>lock()</code>/<code>unlock()</code> explicitly instead of relying on a code block — which means <strong>you must remember to unlock</strong>, always in a <code>finally</code>. Use it when you need to give up on a lock rather than wait forever.` },
         { t: 'code', title: 'ReentrantLock.java — Bank Transfer with Timeout', code:
 `// Real use: bank transfer that refuses to deadlock
 class SafeBank {
@@ -607,6 +610,7 @@ class FeatureFlagCache {
         { t: 'callout', kind: 'note', html: `<strong>Only a win for read-heavy workloads (90%+ reads).</strong> If writes are frequent, the constant write-exclusivity overhead makes it slower than a plain lock. Profile before switching.` },
 
         { t: 'sub', text: 'StampedLock — optimistic reads (Java 8+)' },
+        { t: 'prose', html: `<code>StampedLock</code> adds a third mode on top of read/write: <strong>optimistic reading</strong>. Instead of acquiring a real read lock, you grab a cheap "stamp" (a version number), read the data without blocking anyone, then validate the stamp afterwards. If a writer snuck in, you fall back to a real lock and retry. It's the fastest option when writes are rare — but it is NOT reentrant, so use it carefully.` },
         { t: 'code', title: 'StampedLock.java — Point Distance (Optimistic)', code:
 `// Optimistic read: "I'll read without locking and HOPE nobody wrote"
 // If they did write, I fall back to a real read lock. Fast when writes are rare.
@@ -789,6 +793,7 @@ public int incrementAndGet() {
 // For nanosecond-scale contention, CAS is 3-10x faster` },
 
         { t: 'sub', text: 'The Atomic classes — in practice' },
+        { t: 'prose', html: `<code>java.util.concurrent.atomic</code> gives you wrapper types — <code>AtomicInteger</code>, <code>AtomicLong</code>, <code>AtomicBoolean</code>, <code>AtomicReference</code> — that perform read-modify-write operations as a single CAS instruction instead of a lock. They're the right tool for a single shared counter or flag: faster than <code>synchronized</code>, with no risk of deadlock, but only for <strong>one</strong> variable at a time — they don't help when you need several fields updated together consistently.` },
         { t: 'code', title: 'RequestCounter.java — AtomicLong in Production', code:
 `// Real use: HTTP request counter in a high-traffic web server
 class Metrics {
@@ -824,6 +829,7 @@ count.addAndGet(5);              // count += 5, returns new value
 count.compareAndSet(10, 0);      // if count == 10, set to 0; else do nothing` },
 
         { t: 'sub', text: 'The ABA problem — when CAS gets fooled' },
+        { t: 'prose', html: `CAS only compares the <em>current value</em> to the <em>expected value</em> — it has no idea whether that value changed and changed back in between. If a value goes A → B → A, a CAS still sees "A" and happily proceeds, even though the data was touched twice by someone else. This rarely matters for plain counters, but it can silently corrupt lock-free data structures like stacks and linked lists where <em>identity</em>, not just value, matters.` },
         { t: 'code', title: 'ABA.java — The Problem and Fix', code:
 `// Thread 1 reads: value = "Alice"
 // Thread 2 changes: "Alice" -> "Bob" -> "Alice"  (ABA!)
@@ -899,6 +905,7 @@ class TrafficMetrics {
           ] },
 
         { t: 'sub', text: 'Why thread pools? The real cost of new Thread()' },
+        { t: 'prose', html: `Each <code>new Thread()</code> costs real OS resources — roughly 1MB of stack memory and a kernel scheduling entry — and creating/destroying threads constantly adds up fast under load. A <strong>thread pool</strong> creates a fixed team of threads once and reuses them for every task, eliminating that overhead entirely. This is the single biggest practical lesson in this guide: never call <code>new Thread()</code> per request in production.` },
         { t: 'code', title: 'ThreadCost.java — Why NOT to create threads manually', code:
 `// NEVER do this in production:
 for (HttpRequest req : incomingRequests) {
@@ -920,6 +927,7 @@ for (HttpRequest req : incomingRequests) {
         { t: 'diagram', name: 'threadPool', cap: 'Tasks queue up; a fixed set of reused threads drain the queue into results' },
 
         { t: 'sub', text: 'ExecutorService — the manager' },
+        { t: 'prose', html: `<code>ExecutorService</code> is the interface that sits in front of a thread pool. You hand it tasks via <code>submit()</code> and it returns a <code>Future</code> immediately — you decide later when (and whether) to block on the result. It also owns the task queue and lets you shut the pool down cleanly when your application stops.` },
         { t: 'code', title: 'SearchService.java — Parallel Fan-Out', code:
 `// Real use: parallel search across multiple data sources
 class SearchService {
@@ -965,6 +973,7 @@ class SearchService {
           ] },
 
         { t: 'sub', text: 'Configuring ThreadPoolExecutor for production' },
+        { t: 'prose', html: `The factory methods (<code>newFixedThreadPool</code>, etc.) are convenient defaults, but production systems usually need to hand-tune the underlying <code>ThreadPoolExecutor</code> directly — controlling exactly how many threads exist, how big the backlog queue is, and what happens when the system is overwhelmed.` },
         { t: 'code', title: 'ProductionPool.java — The Right Way', code:
 `// The 5 knobs you need to tune for production:
 ThreadPoolExecutor pool = new ThreadPoolExecutor(
@@ -989,6 +998,7 @@ ThreadPoolExecutor pool = new ThreadPoolExecutor(
 //   If a task is 90% waiting for DB: cores × 10` },
 
         { t: 'sub', text: 'Runnable vs Callable, and Future' },
+        { t: 'prose', html: `<code>Runnable</code> is "fire and forget" — its <code>run()</code> method returns nothing and can't throw a checked exception. <code>Callable&lt;T&gt;</code> is its richer cousin: <code>call()</code> returns a value and is allowed to throw. Submitting a <code>Callable</code> to an executor hands you back a <code>Future&lt;T&gt;</code> — a placeholder for a result that's still being computed, which you collect later with <code>get()</code>.` },
         { t: 'code', title: 'FutureDemo.java — Parallel Price Fetching', code:
 `// Real use: fetch prices from 3 vendors in parallel, use the fastest
 ExecutorService pool = Executors.newFixedThreadPool(3);
@@ -1018,6 +1028,7 @@ try {
         { t: 'callout', kind: 'warning', html: `<code>future.get()</code> blocks the calling thread. Chaining many <code>get()</code> calls in sequence re-serializes your parallel work. The solution is <code>CompletableFuture</code> (Level 10) which never blocks.` },
 
         { t: 'sub', text: 'ForkJoinPool — the work stealer' },
+        { t: 'prose', html: `A regular thread pool is great for independent tasks, but bad for <strong>divide-and-conquer</strong> work where a big task splits into smaller subtasks recursively (sorting, tree traversal, parallel computations). <code>ForkJoinPool</code> is purpose-built for this — each thread keeps its own task queue, and idle threads <strong>steal</strong> work from busy threads to keep every core occupied. It's also the engine quietly powering <code>parallelStream()</code>.` },
         { t: 'code', title: 'ParallelMergeSort.java — Work Stealing in Action', code:
 `// ForkJoinPool powers parallelStream() and is perfect for recursive divide-and-conquer
 class MergeSort extends RecursiveAction {
@@ -1067,6 +1078,7 @@ List<Long> results = largeList.parallelStream()
           ] },
 
         { t: 'sub', text: 'Why NOT use synchronized wrappers?' },
+        { t: 'prose', html: `<code>Collections.synchronizedMap/List</code> wrap a regular collection with a single lock around every method call. It works, but it serializes <strong>all</strong> access — two threads touching completely unrelated keys still block each other — and compound operations like "check then insert" still aren't atomic even though each individual call is synchronized. This is exactly the gap the <code>java.util.concurrent</code> collections were built to close.` },
         { t: 'code', title: 'WhyNot.java — The Problem with synchronizedMap', code:
 `// Old school: Collections.synchronizedMap wraps HashMap with one big lock
 Map<String, Integer> old = Collections.synchronizedMap(new HashMap<>());
@@ -1086,6 +1098,7 @@ ConcurrentHashMap<String, Integer> map = new ConcurrentHashMap<>();
 map.computeIfAbsent("user", k -> 0);  // atomic check-and-insert, built in` },
 
         { t: 'sub', text: 'ConcurrentHashMap — king of collections' },
+        { t: 'prose', html: `<code>ConcurrentHashMap</code> is the default go-to replacement for <code>HashMap</code> under concurrent access. Internally it splits the map into independently-locked buckets (lock striping), so threads updating different keys never block each other, and reads are essentially lock-free. It also offers atomic compound operations — <code>compute</code>, <code>computeIfAbsent</code>, <code>merge</code> — that close the "check then act" race the old synchronized wrappers couldn't.` },
         { t: 'code', title: 'SessionStore.java — Real-World ConcurrentHashMap', code:
 `// Real use: web session store — thousands of concurrent reads and writes
 class SessionStore {
@@ -1116,6 +1129,7 @@ class SessionStore {
         { t: 'callout', kind: 'note', html: `<strong>Use the atomic methods:</strong> <code>compute</code>, <code>computeIfAbsent</code>, <code>merge</code>, <code>putIfAbsent</code>. A naive <code>if (!map.containsKey(k)) map.put(...)</code> is still two separate operations and still races between them, even with ConcurrentHashMap.` },
 
         { t: 'sub', text: 'CopyOnWriteArrayList — the reader\'s paradise' },
+        { t: 'prose', html: `Every write to a <code>CopyOnWriteArrayList</code> copies the entire backing array, mutates the copy, then atomically swaps the reference. The payoff: reads need <strong>zero locking</strong> and an iterator never throws <code>ConcurrentModificationException</code> — it just sees a consistent snapshot, even if another thread is adding entries at that exact moment. The cost is that every write is O(n), so it's only a good fit when reads vastly outnumber writes (listener lists are the textbook example).` },
         { t: 'code', title: 'EventListeners.java — Real-World CopyOnWrite', code:
 `// Real use: event listener list in a framework (read by every event, written rarely)
 class EventBus {
@@ -1140,6 +1154,7 @@ class EventBus {
         { t: 'callout', kind: 'warning', html: `<strong>Where NOT to use CopyOnWriteArrayList:</strong> any list with frequent writes (shopping cart items, score updates, etc.). The copy-on-write makes every write O(n). For write-heavy cases, use a synchronized ArrayList or ConcurrentLinkedQueue.` },
 
         { t: 'sub', text: 'BlockingQueue — the producer-consumer lifeline' },
+        { t: 'prose', html: `A <code>BlockingQueue</code> is a queue that knows how to make threads wait: <code>put()</code> blocks the producer when the queue is full, <code>take()</code> blocks the consumer when it's empty — no manual <code>wait()</code>/<code>notify()</code> required. It's the standard backbone for the producer-consumer pattern: decouple work creation from work processing, with automatic, built-in flow control (backpressure) between them.` },
         { t: 'code', title: 'LogProcessor.java — Real-World BlockingQueue', code:
 `// Real use: async log processing — don't slow down the request thread
 // Producers: request threads that generate log entries
@@ -1271,6 +1286,7 @@ vtExecutor.submit(() -> {
         { t: 'callout', kind: 'note', html: `<strong>Virtual threads are NOT for CPU-bound work.</strong> They shine for I/O — DB calls, HTTP requests, file reads. For CPU-heavy tasks (image processing, encryption), use a bounded platform thread pool (typically CPU core count threads).` },
 
         { t: 'sub', text: 'Structured Concurrency (Java 21 preview)' },
+        { t: 'prose', html: `When you fork several subtasks with <code>CompletableFuture</code> or raw threads, nothing ties their lifetimes together — if one fails, the others keep running in the background, wasting resources or even leaking. <strong>Structured concurrency</strong> treats a group of related subtasks as a single unit: they're forked together, and if any one fails, the rest are automatically cancelled when the scope closes. No orphaned threads, no manual cleanup bookkeeping.` },
         { t: 'code', title: 'StructuredScope.java — No Orphan Threads', code:
 `// Problem without structured concurrency: fire 3 fetches; order fails instantly;
 // user and payment fetches keep running and wasting resources for seconds.
